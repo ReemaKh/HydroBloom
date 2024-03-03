@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "744718018756",
+    "project_id": "hydrobloomapp",
+    "storage_bucket": "hydrobloomapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744718018756:android:0c417ff58e6137b8cc8191",
+        "android_client_info": {
+          "package_name": "com.example.hydrobloomapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjcsFNmmeIcw0BCoJFjBifJDISMmL6IzQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
