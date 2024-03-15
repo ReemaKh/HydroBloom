@@ -1,11 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hydrobloomapp/screens/PasswordRecoveryPage.dart';
 import 'package:hydrobloomapp/screens/SignUpPage.dart';
-import 'package:hydrobloomapp/screens/NotificationsPage.dart';
+import 'package:hydrobloomapp/widgets/notifications_page.dart';
+import 'package:hydrobloomapp/main_screen.dart'; 
 
 class LogInPage extends StatefulWidget {
   @override
@@ -15,13 +13,8 @@ class LogInPage extends StatefulWidget {
 class _LogInPageState extends State<LogInPage> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
-
   String _emailErrorText = 'This email is wrong, Try again! or sign up';
   String _passwordErrorText = 'Wrong password, Try again!';
-
-  int _wrongPasswordAttempts = 0;
-  bool _accountLocked = false;
-
   @override
   void dispose() {
     super.dispose();
@@ -30,10 +23,6 @@ class _LogInPageState extends State<LogInPage> {
   }
 
   void _login() async {
-    if (_accountLocked) {
-      return;
-    }
-
     String email = _emailController.text;
     String password = _passwordController.text;
 
@@ -58,97 +47,24 @@ class _LogInPageState extends State<LogInPage> {
       return;
     }
 
-    bool otpCorrect = await _sendOTP(email);
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    if (otpCorrect) {
-      // Navigate to NotificationsPage
+      // Navigate to mainscreen
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => NotificationsPage()),
+        MaterialPageRoute(builder: (context) => MainScreen()),
       );
-    } else {
-      _wrongPasswordAttempts++;
-
-      if (_wrongPasswordAttempts >= 3) {
-        _accountLocked = true;
-      }
-    }
-  }
-
-  Future<bool> _sendOTP(String email) async {
-    // Generate OTP
-    String otp = _generateOTP();
-
-    final Email emailMessage = Email(
-      body: 'Your OTP is $otp',
-      subject: 'OTP Verification',
-      recipients: [email],
-      isHTML: false,
-    );
-
-    bool isEmailAvailable = await canLaunch('mailto:');
-
-    if (!isEmailAvailable) {
-      print('No email clients found!');
-      return false;
-    }
-
-    try {
-      await FlutterEmailSender.send(emailMessage);
-      // Prompt user to enter OTP
-      String enteredOTP = await _showOTPDialog();
-
-      // Verify OTP
-      if (enteredOTP == otp) {
-        return true;
-      } else {
-        return false;
-      }
     } catch (error) {
-      print('Error sending email: $error');
-      return false;
+      print('Error logging in: $error');
+      setState(() {
+        _passwordErrorText = 'Invalid email or password';
+      });
     }
-  }
-
-  String _generateOTP() {
-    // Generate a random 6-digit OTP
-    Random random = Random();
-    int otp = random.nextInt(900000) + 100000;
-    return otp.toString();
-  }
-
-  Future<String> _showOTPDialog() async {
-    String enteredOTP = '';
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Enter OTP'),
-          content: TextField(
-            onChanged: (value) {
-              enteredOTP = value;
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, enteredOTP);
-              },
-              child: Text('Verify'),
-            ),
-          ],
-        );
-      },
-    );
-
-    return enteredOTP;
   }
 
   void _forgotPassword() {
@@ -184,11 +100,13 @@ class _LogInPageState extends State<LogInPage> {
                   controller: _emailController,
                   decoration: InputDecoration(
                     hintText: 'Enter your email',
-                    errorText: _emailErrorText.isNotEmpty ? _emailErrorText : null,
+                    errorText:
+                        _emailErrorText.isNotEmpty ? _emailErrorText : null,
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.grey[200],
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   ),
                 ),
                 SizedBox(height: 20.0),
@@ -201,11 +119,14 @@ class _LogInPageState extends State<LogInPage> {
                   obscureText: true,
                   decoration: InputDecoration(
                     hintText: 'Enter your password',
-                    errorText: _passwordErrorText.isNotEmpty ? _passwordErrorText : null,
+                    errorText: _passwordErrorText.isNotEmpty
+                        ? _passwordErrorText
+                        : null,
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.grey[200],
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   ),
                 ),
                 SizedBox(height: 20.0),
@@ -214,7 +135,8 @@ class _LogInPageState extends State<LogInPage> {
                   child: Text('Log In'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 80, 205, 205),
-                    padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 12.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 40.0, vertical: 12.0),
                   ),
                 ),
                 SizedBox(height: 10.0),

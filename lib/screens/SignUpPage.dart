@@ -65,13 +65,13 @@ class _SignUpPageState extends State<SignUpPage> {
 
         // Send email verification
 
-        String ngrokUrl =
-            'https://2139-2001-16a2-f86d-e00-7c1a-6261-3be5-a5c.ngrok-free.app'; // Replace this with your ngrok URL
+        //String ngrokUrl =
+            //'https://3ab5-2001-16a2-f797-4900-e4bd-62b4-c7ee-15e5.ngrok-free.app'; // Replace this with your ngrok URL
         await userCredential.user!.sendEmailVerification(
-          ActionCodeSettings(
-            url: '$ngrokUrl/auth',
-            handleCodeInApp: true,
-          ),
+          //ActionCodeSettings(
+            //url: '$ngrokUrl/auth',
+            //handleCodeInApp: true,
+          //),
         );
 
         Navigator.push(

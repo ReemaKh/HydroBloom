@@ -9,9 +9,8 @@ class PasswordRecoveryPage extends StatefulWidget {
 class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
   TextEditingController _emailController = TextEditingController();
   String _emailErrorText = '';
-
   Future<void> _recoverPassword() async {
-    // Validate email field
+// Validate email field
     String email = _emailController.text;
     if (email.isEmpty) {
       setState(() {
@@ -26,9 +25,44 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
 
       // Password reset email sent successfully
       // You can navigate to a confirmation page or show a dialog confirming password recovery
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Password Recovery'),
+            content: Text('Password reset email has been sent to $email'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
     } catch (error) {
       print('Error sending password reset email: $error');
       // Handle error, show error message to the user
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content:
+                Text('Failed to send password reset email. Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -53,7 +87,8 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   hintText: 'Enter your email',
-                  errorText: _emailErrorText.isNotEmpty ? _emailErrorText : null,
+                  errorText:
+                      _emailErrorText.isNotEmpty ? _emailErrorText : null,
                 ),
               ),
               SizedBox(height: 20.0),
