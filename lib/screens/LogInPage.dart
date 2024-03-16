@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hydrobloomapp/screens/PasswordRecoveryPage.dart';
 import 'package:hydrobloomapp/screens/SignUpPage.dart';
-import 'package:hydrobloomapp/widgets/notifications_page.dart';
 import 'package:hydrobloomapp/main_screen.dart'; 
 
 class LogInPage extends StatefulWidget {
@@ -134,7 +133,7 @@ class _LogInPageState extends State<LogInPage> {
                   onPressed: _login,
                   child: Text('Log In'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 80, 205, 205),
+                    backgroundColor: Color(0xFF009688),
                     padding:
                         EdgeInsets.symmetric(horizontal: 40.0, vertical: 12.0),
                   ),

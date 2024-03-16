@@ -23,8 +23,10 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
       // Send password reset email
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
-      // Password reset email sent successfully
-      // You can navigate to a confirmation page or show a dialog confirming password recovery
+      // Password reset email sent successfully 
+      // هنا دايلوق مبدئيا يمكن اغيرها 
+      //لازم نوحد الطريقه بعدين حتى في البروفايل ستنقز و الفالديشن عشان يطلع الابلكيشن ارتب
+      
       showDialog(
         context: context,
         builder: (BuildContext context) {
