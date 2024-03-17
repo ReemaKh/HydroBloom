@@ -25,7 +25,7 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
 
       // Password reset email sent successfully 
       // هنا دايلوق مبدئيا يمكن اغيرها 
-      //لازم نوحد الطريقه بعدين حتى في البروفايل ستنقز و الفالديشن عشان يطلع الابلكيشن ارتب
+      //لازم نوحد الطريقه بعدين حتى في البروفايل ستنقز و الفرتكيشن عشان يطلع الابلكيشن ارتب
       
       showDialog(
         context: context,
