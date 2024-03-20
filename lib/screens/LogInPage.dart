@@ -22,49 +22,62 @@ class _LogInPageState extends State<LogInPage> {
   }
 
   void _login() async {
-    String email = _emailController.text;
-    String password = _passwordController.text;
+  String email = _emailController.text;
+  String password = _passwordController.text;
 
-    if (email.isEmpty) {
-      setState(() {
-        _emailErrorText = 'Email cannot be empty';
-      });
-      return;
-    }
+  if (email.isEmpty) {
+    setState(() {
+      _emailErrorText = 'Email cannot be empty';
+    });
+    return;
+  }
 
-    if (!email.contains('@')) {
-      setState(() {
-        _emailErrorText = 'Invalid email format';
-      });
-      return;
-    }
+  if (!email.contains('@')) {
+    setState(() {
+      _emailErrorText = 'Invalid email format';
+    });
+    return;
+  }
 
-    if (password.isEmpty) {
-      setState(() {
-        _passwordErrorText = 'Password cannot be empty';
-      });
-      return;
-    }
+  if (password.isEmpty) {
+    setState(() {
+      _passwordErrorText = 'Password cannot be empty';
+    });
+    return;
+  }
 
-    try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+  try {
+    UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      // Navigate to mainscreen
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
-      );
-    } catch (error) {
-      print('Error logging in: $error');
+    if (userCredential.user != null) {
+      if (userCredential.user!.emailVerified) {
+        // User is authenticated and email is verified, navigate to mainscreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MainScreen()),
+        );
+      } else {
+        // Email is not verified, show error message
+        setState(() {
+          _emailErrorText = 'Email is not verified';
+        });
+      }
+    } else {
       setState(() {
         _passwordErrorText = 'Invalid email or password';
       });
     }
+  } catch (error) {
+    print('Error logging in: $error');
+    setState(() {
+      _passwordErrorText = 'Invalid email or password';
+    });
   }
+}
 
   void _forgotPassword() {
     Navigator.push(
