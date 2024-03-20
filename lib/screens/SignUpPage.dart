@@ -37,6 +37,14 @@ class _SignUpPageState extends State<SignUpPage> {
       });
       return;
     }
+    if (password.length < 8 ||
+      !password.contains(RegExp(r'[A-Z]')) ||
+      !password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+    setState(() {
+      _passwordErrorText =
+          'Password must be at least 8 characters long, \n contain at least one capital letter,\n and at least one special character \n (!@#\$%^&*(),.?":{}|<>)';
+    });
+    return;}
     if (password != confirmPassword) {
       setState(() {
         _passwordErrorText = 'Passwords do not match';
@@ -195,4 +203,4 @@ class VerifyEmailPage extends StatelessWidget {
       ),
     );
   }
-}
+} 
