@@ -71,16 +71,7 @@ class _SignUpPageState extends State<SignUpPage> {
         });
 
         // Send email verification
-        //هنا استخدمت ngrok which is virtual domain
-        //لازم كل مره اغير اللنك في الكود والفاير ستور 
-
-        //String ngrokUrl =
-            //'https://3ab5-2001-16a2-f797-4900-e4bd-62b4-c7ee-15e5.ngrok-free.app'; // Replace this with your ngrok URL
         await userCredential.user!.sendEmailVerification(
-          //ActionCodeSettings(
-            //url: '$ngrokUrl/auth',
-            //handleCodeInApp: true,
-          //),
         );
 
         Navigator.push(

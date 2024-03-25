@@ -8,36 +8,53 @@ class DiscoverPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final plants = [
-      {'name': 'Pothos', 'image': 'images/pothos.png'},
-      {'name': 'Bamboo', 'image': 'images/bamboo.png'},
-      {'name': 'Sansevieria', 'image': 'images/sansevieria.png'},
-      {'name': 'Peace Lily', 'image': 'images/peace_lily.png'},
-    ];
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('plants').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Text('Error: ${snapshot.error}'),
+          );
+        } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(
+            child: Text('No plants found'),
+          );
+        } else {
+          return GridView.builder(
+            padding: const EdgeInsets.all(8.0),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.8,
+            ),
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (context, index) {
+              final plant = snapshot.data!.docs[index];
+              final plantName = plant['Name'];
+              final plantImage = 'images/${plantName.toLowerCase().replaceAll(' ', '_')}.png';
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(8.0),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.8,
-      ),
-      itemCount: plants.length,
-      itemBuilder: (context, index) {
-        return PlantCard(
-          plantName: plants[index]['name']!,
-          plantImage: plants[index]['image']!,
-          onAddToGarden: () => onAddToGarden(plants[index]['name']!),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PlantCareDetailsPage(
-                  plantId: plants[index]['name']!,
-                ),
-              ),
-            );
-          },
-        );
+              return PlantCard(
+                plantName: plantName,
+                plantImage: plantImage,
+                onAddToGarden: () => onAddToGarden(plantName),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PlantCareDetailsPage(
+                        plantId: plant.id,
+                        plantName: plantName,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        }
       },
     );
   }
@@ -93,8 +110,9 @@ class PlantCard extends StatelessWidget {
 
 class PlantCareDetailsPage extends StatelessWidget {
   final String plantId;
+  final String plantName;
 
-  PlantCareDetailsPage({required this.plantId});
+  PlantCareDetailsPage({required this.plantId, required this.plantName});
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +166,7 @@ class PlantCareDetailsPage extends StatelessWidget {
                     SizedBox(height: 16),
                     iconInfo(context, Icons.water, 'Water', water, Colors.blue),
                     iconInfo(context, Icons.lightbulb, 'Light', light, Colors.yellow),
-                    iconInfo(context, Icons.thermostat, 'Temperature', temperature, Colors.red),
+iconInfo(context, Icons.thermostat, 'Temperature', temperature, Colors.red),
                     iconInfo(context, Icons.eco, 'Fertilizer', fertilizer, Colors.green),
                   ],
                 ),
@@ -164,39 +182,24 @@ class PlantCareDetailsPage extends StatelessWidget {
     );
   }
 }
-  Widget iconInfo(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String content,
-    Color color,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 30, color: color),
-          SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  content,
-                  style: TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-        ],
+
+Widget iconInfo(BuildContext context, IconData icon, String title, String value, Color color) {
+  return Row(
+    children: [
+      Icon(icon, color: color),
+      SizedBox(width: 8),
+      Text(
+        title,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
       ),
-    );
-  }
-  
-
-
+      SizedBox(width: 8),
+      Text(
+        value,
+        style: TextStyle(fontSize: 16),
+      ),
+    ],
+  );
+}
