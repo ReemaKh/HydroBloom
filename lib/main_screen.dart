@@ -5,7 +5,8 @@ import 'widgets/notifications_page.dart';
 import 'widgets/my_garden_page.dart';
 import 'widgets/discover_page.dart';
 import 'widgets/profile_page.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -15,6 +16,29 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 1; // Default to 'Discover'
   List<String> myGarden = []; // Example garden list
+  String userId = ''; // User ID variable
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserId(); // Fetch the user ID when the screen initializes
+  }
+
+  void fetchUserId() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (snapshot.exists) {
+        setState(() {
+          userId = user.uid;
+        });
+      }
+    }
+  }
 
   void onAddToGarden(String plantName) {
     if (!myGarden.contains(plantName)) {
@@ -29,8 +53,8 @@ class _MainScreenState extends State<MainScreen> {
     final List<Widget> _pages = [
       GuidePage(),
       NotificationsPage(),
-      MyGardenPage(myGarden: myGarden), // Pass the garden list
-      DiscoverPage(onAddToGarden: onAddToGarden), // Pass the callback
+      MyGardenPage(myGarden: myGarden, userId: userId),
+      DiscoverPage(onAddToGarden: onAddToGarden),
       ProfilePage(),
     ];
 
@@ -62,12 +86,18 @@ class _MainScreenState extends State<MainScreen> {
 
   String _getTitleForSelectedPage(int index) {
     switch (index) {
-      case 0: return 'Guide';
-      case 1: return 'Notifications';
-      case 2: return 'My Garden';
-      case 3: return 'Discover';
-      case 4: return 'Profile';
-      default: return 'Plant App';
+      case 0:
+        return 'Guide';
+      case 1:
+        return 'Notifications';
+      case 2:
+        return 'My Garden';
+      case 3:
+        return 'Discover';
+      case 4:
+        return 'Profile';
+      default:
+        return 'Plant App';
     }
   }
 }

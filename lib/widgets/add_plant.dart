@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class DiscoverPage extends StatelessWidget {
+class addPlant extends StatelessWidget {
   final Function(String) onAddToGarden;
 
-  DiscoverPage({required this.onAddToGarden});
+  addPlant({required this.onAddToGarden});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
+      appBar: AppBar(
+        title: Text('Add New Plant To The Garden'),
+        backgroundColor: Color(0xFF009688),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       backgroundColor: Colors.white,
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('plants').snapshots(),
@@ -17,6 +26,10 @@ class DiscoverPage extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
             );
           } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(
@@ -40,6 +53,7 @@ class DiscoverPage extends StatelessWidget {
                   plantId: plantId,
                   plantName: plantName,
                   plantImage: plantImage,
+                  onAddToGarden: () => onAddToGarden(plantId),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -65,12 +79,14 @@ class PlantCard extends StatelessWidget {
   final String plantId;
   final String plantName;
   final String plantImage;
+  final VoidCallback onAddToGarden;
   final VoidCallback onTap;
 
   const PlantCard({
     required this.plantId,
     required this.plantName,
     required this.plantImage,
+    required this.onAddToGarden,
     required this.onTap,
   });
 
@@ -90,12 +106,21 @@ class PlantCard extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(
-                plantName,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    plantName,
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: onAddToGarden,
+                  ),
+                ],
               ),
             ),
           ],
