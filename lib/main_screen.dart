@@ -15,7 +15,6 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 1; // Default to 'Discover'
-  List<String> myGarden = []; // Example garden list
   String userId = ''; // User ID variable
 
   @override
@@ -40,21 +39,13 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void onAddToGarden(String plantName) {
-    if (!myGarden.contains(plantName)) {
-      setState(() {
-        myGarden.add(plantName);
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> _pages = [
       GuidePage(),
       NotificationsPage(),
-      MyGardenPage(myGarden: myGarden, userId: userId),
-      DiscoverPage(onAddToGarden: onAddToGarden),
+      MyGardenPage(userId: userId),
+      DiscoverPage(),
       ProfilePage(),
     ];
 

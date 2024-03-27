@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class addPlant extends StatelessWidget {
-  final Function(String) onAddToGarden;
+class AddPlant extends StatelessWidget {
+  final String userId;
 
-  addPlant({required this.onAddToGarden});
+  AddPlant({required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class addPlant extends StatelessWidget {
                   plantId: plantId,
                   plantName: plantName,
                   plantImage: plantImage,
-                  onAddToGarden: () => onAddToGarden(plantId),
+                  onAddToGarden: () => _addToUserGarden(userId, plantId),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -72,6 +72,17 @@ class addPlant extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _addToUserGarden(String userId, String plantId) async {
+    try {
+      await FirebaseFirestore.instance.collection('userGarden').doc(userId).set({
+        'userId': userId,
+        'plantIds': FieldValue.arrayUnion([plantId]),
+      }, SetOptions(merge: true));
+    } catch (error) {
+      print('Error adding plant to user garden: $error');
+    }
   }
 }
 

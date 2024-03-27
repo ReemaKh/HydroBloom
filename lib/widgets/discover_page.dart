@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DiscoverPage extends StatelessWidget {
-  final Function(String) onAddToGarden;
+  //final Function(String) onAddToGarden;
 
-  DiscoverPage({required this.onAddToGarden});
+  //DiscoverPage({required this.onAddToGarden});
 
   @override
   Widget build(BuildContext context) {

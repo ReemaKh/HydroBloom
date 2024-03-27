@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-
 import 'package:hydrobloomapp/widgets/add_plant.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
+
 
 class MyGardenPage extends StatefulWidget {
-  final List<String> myGarden;
   final String userId;
 
-  MyGardenPage({required this.myGarden, required this.userId});
+  MyGardenPage({required this.userId});
 
   @override
   _MyGardenPageState createState() => _MyGardenPageState();
@@ -28,11 +24,11 @@ class _MyGardenPageState extends State<MyGardenPage> {
 
   void fetchGardenData() async {
     DocumentSnapshot<Map<String, dynamic>> snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(widget.userId).get();
+        await FirebaseFirestore.instance.collection('userGarden').doc(widget.userId).get();
 
     if (snapshot.exists) {
       setState(() {
-        myGarden = List<String>.from(snapshot.data()!['garden']);
+        myGarden = List<String>.from(snapshot.data()!['plantIds'] ?? []);
       });
 
       await fetchPlantNames();
@@ -53,32 +49,16 @@ class _MyGardenPageState extends State<MyGardenPage> {
     }
   }
 
-  void addToGarden(String plantId) async {
-    if (!myGarden.contains(plantId)) {
-      setState(() {
-        myGarden.add(plantId);
-      });
-
-      await FirebaseFirestore.instance.collection('users').doc(widget.userId).update(
-        {'garden': FieldValue.arrayUnion([plantId])},
-      );
-
-      Provider.of<GardenModel>(context, listen: false).addToGarden(plantId);
-      await fetchPlantNames(); // Refresh plant names after adding a new plant
-    }
-  }
-
   void removeFromGarden(String plantId) async {
     if (myGarden.contains(plantId)) {
       setState(() {
         myGarden.remove(plantId);
       });
 
-      await FirebaseFirestore.instance.collection('users').doc(widget.userId).update(
-        {'garden': FieldValue.arrayRemove([plantId])},
+      await FirebaseFirestore.instance.collection('userGarden').doc(widget.userId).update(
+        {'plantIds': FieldValue.arrayRemove([plantId])},
       );
 
-      Provider.of<GardenModel>(context, listen: false).removeFromGarden(plantId);
       await fetchPlantNames(); // Refresh plant names after removing a plant
     }
   }
@@ -106,7 +86,7 @@ class _MyGardenPageState extends State<MyGardenPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => addPlant(onAddToGarden: addToGarden)),
+            MaterialPageRoute(builder: (context) => AddPlant(userId: widget.userId)),
           );
         },
         child: Icon(Icons.add),
@@ -116,7 +96,6 @@ class _MyGardenPageState extends State<MyGardenPage> {
   }
 }
 
-// PlantGardenCard Widget
 class PlantGardenCard extends StatelessWidget {
   final String plantName;
   final VoidCallback onDelete;
