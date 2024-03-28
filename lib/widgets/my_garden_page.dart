@@ -23,12 +23,14 @@ class _MyGardenPageState extends State<MyGardenPage> {
   }
 
   void fetchGardenData() async {
-    DocumentSnapshot<Map<String, dynamic>> snapshot =
-        await FirebaseFirestore.instance.collection('userGarden').doc(widget.userId).get();
+    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
+        .collection('userPlant')
+        .where('userId', isEqualTo: widget.userId)
+        .get();
 
-    if (snapshot.exists) {
+    if (snapshot.docs.isNotEmpty) {
       setState(() {
-        myGarden = List<String>.from(snapshot.data()!['plantIds'] ?? []);
+        myGarden = snapshot.docs.map((doc) => doc['plantId'] as String).toList(); // Corrected type assignment
       });
 
       await fetchPlantNames();
@@ -36,14 +38,13 @@ class _MyGardenPageState extends State<MyGardenPage> {
   }
 
   Future<void> fetchPlantNames() async {
-    // Fetching plant names based on IDs stored in myGarden
     for (String plantId in myGarden) {
       DocumentSnapshot<Map<String, dynamic>> plantSnapshot =
           await FirebaseFirestore.instance.collection('plants').doc(plantId).get();
 
       if (plantSnapshot.exists) {
         setState(() {
-          plantNames[plantId] = plantSnapshot.data()!['Name'];
+          plantNames[plantId] = plantSnapshot.data()!['Name'] as String; // Corrected type assignment
         });
       }
     }
@@ -55,11 +56,18 @@ class _MyGardenPageState extends State<MyGardenPage> {
         myGarden.remove(plantId);
       });
 
-      await FirebaseFirestore.instance.collection('userGarden').doc(widget.userId).update(
-        {'plantIds': FieldValue.arrayRemove([plantId])},
-      );
+      await FirebaseFirestore.instance
+          .collection('userPlant')
+          .where('userId', isEqualTo: widget.userId)
+          .where('plantId', isEqualTo: plantId)
+          .get()
+          .then((snapshot) {
+        if (snapshot.docs.isNotEmpty) {
+          snapshot.docs.first.reference.delete();
+        }
+      });
 
-      await fetchPlantNames(); // Refresh plant names after removing a plant
+      await fetchPlantNames();
     }
   }
 
@@ -86,7 +94,7 @@ class _MyGardenPageState extends State<MyGardenPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddPlant(userId: widget.userId)),
+            MaterialPageRoute(builder: (context) => AddPlant(userId: widget.userId)), // Navigate to AddPlant widget
           );
         },
         child: Icon(Icons.add),
@@ -144,7 +152,6 @@ class PlantGardenCard extends StatelessWidget {
     );
   }
 }
-
 class GardenModel with ChangeNotifier {
   final List<String> _myGarden = [];
 
