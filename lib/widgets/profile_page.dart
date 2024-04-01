@@ -100,7 +100,6 @@ class UserPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('User Page'),
             SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: () {
@@ -111,12 +110,24 @@ class UserPage extends StatelessWidget {
               },
               child: Text('Reset Password'),
             ),
+            SizedBox(height: 10.0), 
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => LogInPage()),
+                  (route) => false, 
+                );
+              },
+              child: Text('Log Out'),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
 
 class PasswordResetPage extends StatefulWidget {
   @override

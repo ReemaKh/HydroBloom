@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => GardenModel(),
       child: MaterialApp(
-        title: 'Plant App',
+        title: 'HydroBloom',
         theme: ThemeData(
           primaryColor: Color(0xFF009688),
         ),
