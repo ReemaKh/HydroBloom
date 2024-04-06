@@ -47,7 +47,7 @@ class AddPlant extends StatelessWidget {
                 final plant = snapshot.data!.docs[index];
                 final plantId = plant.id;
                 final plantName = plant['Name'];
-                final plantImage = 'images/${plantName.toLowerCase().replaceAll(' ', '_')}.png';
+                final plantImage = plant['image'];
 
                 return PlantCard(
                   plantId: plantId,
@@ -133,8 +133,8 @@ class PlantCard extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: Image.asset(
-                plantImage,
+              child: Image.network(
+                plantImage, // Use Image.network to load image from URL
                 fit: BoxFit.cover,
               ),
             ),
@@ -163,6 +163,7 @@ class PlantCard extends StatelessWidget {
     );
   }
 }
+
 
 class PlantCareDetailsPage extends StatelessWidget {
   final String plantId;
