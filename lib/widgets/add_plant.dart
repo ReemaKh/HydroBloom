@@ -53,7 +53,7 @@ class AddPlant extends StatelessWidget {
                   plantId: plantId,
                   plantName: plantName,
                   plantImage: plantImage,
-                  onAddToGarden: () => _addToUserGarden(userId, plantId),
+                  onAddToGarden: () => _addToUserGarden(userId, plantId), // Pass userId to the function
                   onTap: () {
                     Navigator.push(
                       context,
@@ -75,38 +75,44 @@ class AddPlant extends StatelessWidget {
   }
 
   Future<void> _addToUserGarden(String userId, String plantId) async {
-  try {
-    // Fetch plant details
-    DocumentSnapshot<Map<String, dynamic>> plantSnapshot =
-        await FirebaseFirestore.instance.collection('plants').doc(plantId).get();
-    if (!plantSnapshot.exists) {
-      print('Plant with ID $plantId not found.');
-      return;
-    }
+    try {
+      // Fetch plant details
+      DocumentSnapshot<Map<String, dynamic>> plantSnapshot =
+          await FirebaseFirestore.instance.collection('plants').doc(plantId).get();
+      if (!plantSnapshot.exists) {
+        print('Plant with ID $plantId not found.');
+        return;
+      }
 
-    // Get plant name
-    String plantName = plantSnapshot.data()!['Name'];
-    print('Plant name: $plantName'); // Add this line to check the plant name
+      // Get plant name
+      String plantName = plantSnapshot.data()!['Name'];
+      print('Plant name: $plantName');
 
-    // Add plant to userPlant collection
+       // Add plant to userPlant collection
     String userPlantId = FirebaseFirestore.instance.collection('userPlant').doc().id;
     await FirebaseFirestore.instance.collection('userPlant').doc(userPlantId).set({
       'userPlantId': userPlantId,
       'userId': userId,
       'plantId': plantId,
       'plantName': plantName,
+      'plantStatus': {
+        'water': false,
+        'fertilizer': false,
+        'sunlight': false,
+        'temperature': false,
+        'humidity': false,
+      },
     });
 
-    // Add userPlantId to userGarden collection
-    await FirebaseFirestore.instance.collection('userGarden').doc(userId).set({
-      'userId': userId,
-      'userPlantIds': FieldValue.arrayUnion([userPlantId]),
-    }, SetOptions(merge: true));
-  } catch (error) {
-    print('Error adding plant to user garden: $error');
+      // Add userPlantId to userGarden collection
+      await FirebaseFirestore.instance.collection('userGarden').doc(userId).set({
+        'userId': userId,
+        'userPlantIds': FieldValue.arrayUnion([userPlantId]),
+      }, SetOptions(merge: true));
+    } catch (error) {
+      print('Error adding plant to user garden: $error');
+    }
   }
-}
-
 }
 
 class PlantCard extends StatelessWidget {
@@ -134,7 +140,7 @@ class PlantCard extends StatelessWidget {
           children: [
             Expanded(
               child: Image.network(
-                plantImage, // Use Image.network to load image from URL
+                plantImage,
                 fit: BoxFit.cover,
               ),
             ),
