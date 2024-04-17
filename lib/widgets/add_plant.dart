@@ -102,6 +102,9 @@ class AddPlant extends StatelessWidget {
         'temperature': false,
         'humidity': false,
       },
+      //هاذي كلها فولس باي ديفولت
+      // الكونيكتيد فولس لين النبته تصير كونيكتيد لسينسور
+      'connected': false,
     });
 
       // Add userPlantId to userGarden collection

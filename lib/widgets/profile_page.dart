@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hydrobloomapp/screens/LogInPage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -14,14 +15,14 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton.icon(
               icon: Icon(Icons.account_circle, color: Colors.white),
-              label: Text('User Settings', style: TextStyle(color: Colors.white)),
+              label:
+                  Text('User Settings', style: TextStyle(color: Colors.white)),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -37,7 +38,8 @@ class _ProfilePageState extends State<ProfilePage> {
             SizedBox(height: 16),
             ElevatedButton.icon(
               icon: Icon(Icons.settings, color: Colors.white),
-              label: Text('Sensor Settings', style: TextStyle(color: Colors.white)),
+              label: Text('Sensor Settings',
+                  style: TextStyle(color: Colors.white)),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -69,7 +71,8 @@ class _ProfilePageState extends State<ProfilePage> {
             SizedBox(height: 16),
             ElevatedButton.icon(
               icon: Icon(Icons.lock, color: Colors.white),
-              label: Text('Privacy Policy', style: TextStyle(color: Colors.white)),
+              label:
+                  Text('Privacy Policy', style: TextStyle(color: Colors.white)),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -110,13 +113,13 @@ class UserPage extends StatelessWidget {
               },
               child: Text('Reset Password'),
             ),
-            SizedBox(height: 10.0), 
+            SizedBox(height: 10.0),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => LogInPage()),
-                  (route) => false, 
+                  (route) => false,
                 );
               },
               child: Text('Log Out'),
@@ -128,7 +131,6 @@ class UserPage extends StatelessWidget {
   }
 }
 
-
 class PasswordResetPage extends StatefulWidget {
   @override
   _PasswordResetPageState createState() => _PasswordResetPageState();
@@ -139,7 +141,6 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
   String _emailErrorText = '';
 
   Future<void> _recoverPassword() async {
-    
     String email = _emailController.text;
     if (email.isEmpty) {
       setState(() {
@@ -158,14 +159,17 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Password Reset'),
-            content: Text('Password reset email has been sent to $email \n please log in with the new password'),
+            content: Text(
+                'Password reset email has been sent to $email \n please log in with the new password'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => LogInPage()), // Replace LoginPage with your actual login page
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            LogInPage()), // Replace LoginPage with your actual login page
                   );
                 },
                 child: Text('OK'),
@@ -182,7 +186,8 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Error'),
-            content: Text('Failed to send password reset email. Please try again.'),
+            content:
+                Text('Failed to send password reset email. Please try again.'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -218,7 +223,8 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   hintText: 'Enter your email',
-                  errorText: _emailErrorText.isNotEmpty ? _emailErrorText : null,
+                  errorText:
+                      _emailErrorText.isNotEmpty ? _emailErrorText : null,
                 ),
               ),
               SizedBox(height: 20.0),
@@ -236,49 +242,180 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
   }
 }
 
-class SensorsPage extends StatelessWidget {
+class SensorsPage extends StatefulWidget {
+  @override
+  _SensorsPageState createState() => _SensorsPageState();
+}
+
+class _SensorsPageState extends State<SensorsPage> {
+  List<String> plants = [];
+  String? selectedPlant;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPlants();
+  }
+
+  Future<void> fetchPlants() async {
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('userPlant')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      List<String> fetchedPlants = snapshot.docs.map((doc) => doc['plantName'].toString()).toList();
+      setState(() {
+        plants = fetchedPlants;
+      });
+    } catch (error) {
+      print('Error fetching plants: $error');
+    }
+  }
+
+  Future<void> _connectSensor() async {
+    if (selectedPlant == null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Please select a plant to connect.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+    String plantName = selectedPlant!;
+
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('userPlant')
+          .where('userId', isEqualTo: userId)
+          .where('name', isEqualTo: plantName)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        String plantId = snapshot.docs.first.id;
+
+        await FirebaseFirestore.instance
+            .collection('sensors')
+            .doc(plantId)
+            .set({'userId': userId, 'plantId': plantId});
+
+        await FirebaseFirestore.instance
+            .collection('userPlant')
+            .doc(userId)
+            .collection('plants')
+            .doc(plantId)
+            .update({'connected': true});
+
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Success'),
+              content: Text('Sensor connected successfully.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text('Plant not found.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (error) {
+      print('Error connecting sensor: $error');
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Failed to connect sensor. Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF009688),
-        title: Text(
-          'Sensor Settings',
-          style: TextStyle(color: Colors.white), // Set the color to white
-        ),
+        title: Text('Sensor Settings'),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'To activate the Bluetooth sensor:',
-                style: TextStyle(fontSize: 24),
-              ),
-              SizedBox(height: 30),
-              Text(
-                '1. Go to the Settings menu on your phone.',
-                style: TextStyle(fontSize: 18),
-              ),
-              SizedBox(height: 30),
-              Text(
-                '2. Look for an option like "Connections" or "Bluetooth & WiFi".',
-                style: TextStyle(fontSize: 18),
-              ),
-              SizedBox(height: 30),
-              Text(
-                '3. Select the "Bluetooth" option.',
-                style: TextStyle(fontSize: 18),
-              ),
-              SizedBox(height: 30),
-              Text(
-                '4. Tap/click the option to turn on/activate the Bluetooth sensor/functionality.',
-                style: TextStyle(fontSize: 18),
-              ),
-            ],
-          ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text(
+              'Select a plant to connect:',
+              style: TextStyle(fontSize: 16.0),
+            ),
+            SizedBox(height: 16.0),
+            DropdownButton<String>(
+              value: selectedPlant,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedPlant = newValue;
+                });
+              },
+              items: plants.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: _connectSensor,
+              child: Text('Connect'),
+            ),
+          ],
         ),
       ),
     );
