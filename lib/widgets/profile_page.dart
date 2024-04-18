@@ -453,26 +453,17 @@ class SupportPage extends StatelessWidget {
             ),
             SizedBox(height: 16),
             ElevatedButton(
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Color(0xFF009688),
-  ),
-  child: Text(
-    'Contact Support: hydrobloom9@gmail.com',
-    style: TextStyle(fontSize: 16, color: Colors.white),
-  ),
-  onPressed: () async {
-    final Uri params = Uri(
-      scheme: 'mailto',
-      path: 'hydrobloom9@gmail.com',
-    );
-    try {
-      await launch(params.toString());
-    } catch (e) {
-      print('Error launching email client: $e');
-    }
-  },
-),
-
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF009688),
+              ),
+              child: Text(
+                'Contact Support: hydrobloom9@gmail.com',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              onPressed: () {
+                launch('mailto:hydrobloom9@gmail.com');
+              },
+            ),
           ],
         ),
       ),
