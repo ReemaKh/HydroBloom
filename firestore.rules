@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // For the users collection
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // For the plants collection
+    match /plants/{plant} {
+      allow read: if true;
+    }
+
+    // For the userGarden collection
+    match /userGarden/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // For the userPlant collection
+    match /userPlant/{userPlantId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // For the sensors collection
+    match /sensors/{sensorId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+

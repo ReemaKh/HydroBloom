@@ -1,0 +1,11 @@
+{
+  "projects": {
+    "default": "hydrobloomapp"
+  },
+  "targets": {},
+  "etags": {
+    "hydrobloomapp": {
+      "extensionInstances": {}
+    }
+  }
+}

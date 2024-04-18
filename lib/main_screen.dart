@@ -58,7 +58,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Color(0xFF009688), // Use a specific color
         items: [
           TabItem(icon: Icons.book, title: 'Guide'),
-          TabItem(icon: Icons.notifications, title: 'Notifications'),
+          TabItem(icon: Icons.notifications, title: 'Alerts'),
           TabItem(icon: Icons.grass, title: 'My Garden'),
           TabItem(icon: Icons.search, title: 'Discover'),
           TabItem(icon: Icons.person, title: 'Profile'),
@@ -80,7 +80,7 @@ class _MainScreenState extends State<MainScreen> {
       case 0:
         return 'Guide';
       case 1:
-        return 'Notifications';
+        return 'Alerts';
       case 2:
         return 'My Garden';
       case 3:

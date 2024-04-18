@@ -144,7 +144,7 @@ class PlantCareDetailsPage extends StatelessWidget {
 
               String generalInfo = data['General Information'] ?? '';
 
-              return Padding(
+              return SingleChildScrollView( // Wrap the content with SingleChildScrollView
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,22 +182,30 @@ class PlantCareDetailsPage extends StatelessWidget {
 }
 
 Widget iconInfo(BuildContext context, IconData icon, String title, String value, Color color) {
-  return Row(
-    children: [
-      Icon(icon, color: color),
-      SizedBox(width: 8),
-      Text(
-        title,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 30.0), 
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: color),
+            SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
-      ),
-      SizedBox(width: 8),
-      Text(
-        value,
-        style: TextStyle(fontSize: 16),
-      ),
-    ],
+        SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(fontSize: 16),
+        ),
+      ],
+    ),
   );
 }
