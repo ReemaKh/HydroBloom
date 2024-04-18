@@ -187,7 +187,8 @@ class PlantCareDetailsPage extends StatelessWidget {
         title: Text('Plant Care Details'),
       ),
       body: FutureBuilder<DocumentSnapshot>(
-        future: FirebaseFirestore.instance.collection('plants').doc(plantId).get(),
+        future:
+            FirebaseFirestore.instance.collection('plants').doc(plantId).get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -202,21 +203,43 @@ class PlantCareDetailsPage extends StatelessWidget {
               child: Text('Plant not found'),
             );
           } else {
-            Map<String, dynamic>? data = snapshot.data!.data() as Map<String, dynamic>?;
-            if (data != null && data['Plant Requirements'] is Map<String, dynamic>) {
-              Map<String, dynamic> plantRequirements = data['Plant Requirements'];
+            Map<String, dynamic>? data =
+                snapshot.data!.data() as Map<String, dynamic>?;
+            if (data != null &&
+                data['Plant Requirements'] is Map<String, dynamic>) {
+              Map<String, dynamic> plantRequirements =
+                  data['Plant Requirements'];
               String water = plantRequirements['Water'];
               String light = plantRequirements['Light'];
               String temperature = plantRequirements['Temperature'];
               String fertilizer = plantRequirements['Fertilizer'];
 
               String generalInfo = data['General Information'] ?? '';
+              String plantImage = data['image'] ?? '';
 
-              return Padding(
+              return SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Center(
+                      child: Container(
+                        height: 200,
+                        width: 200,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Color.fromARGB(255, 233, 229, 229),
+                            width: 5.0,
+                          ),
+                          image: DecorationImage(
+                            image: NetworkImage(plantImage),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
                     const Text(
                       'General Information:',
                       style: TextStyle(
@@ -231,9 +254,12 @@ class PlantCareDetailsPage extends StatelessWidget {
                     ),
                     SizedBox(height: 16),
                     iconInfo(context, Icons.water, 'Water', water, Colors.blue),
-                    iconInfo(context, Icons.lightbulb, 'Light', light, Colors.yellow),
-                    iconInfo(context, Icons.thermostat, 'Temperature', temperature, Colors.red),
-                    iconInfo(context, Icons.eco, 'Fertilizer', fertilizer, Colors.green),
+                    iconInfo(context, Icons.lightbulb, 'Light', light,
+                        Colors.yellow),
+                    iconInfo(context, Icons.thermostat, 'Temperature',
+                        temperature, Colors.red),
+                    iconInfo(context, Icons.eco, 'Fertilizer', fertilizer,
+                        Colors.green),
                   ],
                 ),
               );
@@ -249,23 +275,32 @@ class PlantCareDetailsPage extends StatelessWidget {
   }
 }
 
+
 Widget iconInfo(BuildContext context, IconData icon, String title, String value, Color color) {
-  return Row(
-    children: [
-      Icon(icon, color: color),
-      SizedBox(width: 8),
-      Text(
-        title,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 30.0), 
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: color),
+            SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
-      ),
-      SizedBox(width: 8),
-      Text(
-        value,
-        style: TextStyle(fontSize: 16),
-      ),
-    ],
+        SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(fontSize: 16),
+        ),
+      ],
+    ),
   );
 }
