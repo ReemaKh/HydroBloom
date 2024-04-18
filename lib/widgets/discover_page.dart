@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DiscoverPage extends StatelessWidget {
-  //final Function(String) onAddToGarden;
-
-  //DiscoverPage({required this.onAddToGarden});
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,7 +80,7 @@ class PlantCard extends StatelessWidget {
           children: [
             Expanded(
               child: Image.network(
-                plantImage, // Use Image.network to load image from URL
+                plantImage, 
                 fit: BoxFit.cover,
               ),
             ),

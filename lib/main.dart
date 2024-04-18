@@ -3,8 +3,6 @@ import 'package:hydrobloomapp/screens/LogInPage.dart';
 import 'package:hydrobloomapp/widgets/my_garden_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-//import 'firebase_options.dart';
-//import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 void main() async {

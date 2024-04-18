@@ -14,13 +14,13 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 1; // Default to 'Discover'
-  String userId = ''; // User ID variable
+  int _selectedIndex = 1; 
+  String userId = ''; 
 
   @override
   void initState() {
     super.initState();
-    fetchUserId(); // Fetch the user ID when the screen initializes
+    fetchUserId(); 
   }
 
   void fetchUserId() async {
@@ -53,9 +53,9 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Text(_getTitleForSelectedPage(_selectedIndex)),
       ),
-      body: _pages[_selectedIndex], // Directly show the selected page
+      body: _pages[_selectedIndex], 
       bottomNavigationBar: ConvexAppBar(
-        backgroundColor: Color(0xFF009688), // Use a specific color
+        backgroundColor: Color(0xFF009688), 
         items: [
           TabItem(icon: Icons.book, title: 'Guide'),
           TabItem(icon: Icons.notifications, title: 'Alerts'),

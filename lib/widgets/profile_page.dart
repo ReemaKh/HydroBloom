@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hydrobloomapp/screens/LogInPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
 
@@ -446,23 +447,32 @@ class SupportPage extends StatelessWidget {
             ),
             SizedBox(height: 16),
             Text(
-              'If you have any questions or need assistance, please feel free to contact us via email:',
+              'If you have any questions or need \n assistance, please feel free to \n contact us via email:',
               style: TextStyle(fontSize: 20),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 16),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF009688),
-              ),
-              child: Text(
-                'Contact Support: hydrobloom9@gmail.com',
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
-              onPressed: () {
-                launch('mailto:hydrobloom9@gmail.com');
-              },
-            ),
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Color(0xFF009688),
+  ),
+  child: Text(
+    'Contact Support: hydrobloom9@gmail.com',
+    style: TextStyle(fontSize: 16, color: Colors.white),
+  ),
+  onPressed: () async {
+    final Uri params = Uri(
+      scheme: 'mailto',
+      path: 'hydrobloom9@gmail.com',
+    );
+    try {
+      await launch(params.toString());
+    } catch (e) {
+      print('Error launching email client: $e');
+    }
+  },
+),
+
           ],
         ),
       ),

@@ -15,19 +15,25 @@ class GuidePage extends StatelessWidget {
         children: <Widget>[
           GuideItem(
             title: 'Find out your plant disease and treatment',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DiseaseTreatmentPage())),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => DiseaseTreatmentPage())),
           ),
           GuideItem(
             title: 'The correct way to change water',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => WaterChangePage())),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => WaterChangePage())),
           ),
           GuideItem(
             title: 'DIY Fertilizer at your home',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FertilizerPage())),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => FertilizerPage())),
           ),
           GuideItem(
             title: 'The correct way to fertilizing',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FertilizingPage())),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => FertilizingPage())),
           ),
         ],
       ),
@@ -49,7 +55,7 @@ class GuideItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(Icons.info_outline),
+            Icon(Icons.filter_vintage_outlined),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(

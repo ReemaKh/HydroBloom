@@ -11,7 +11,7 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
   String _emailErrorText = '';
 
   Future<void> _recoverPassword() async {
-    // Validate email field
+    
     String email = _emailController.text;
     if (email.isEmpty) {
       setState(() {
@@ -44,7 +44,7 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
       );
     } catch (error) {
       print('Error sending password reset email: $error');
-      // Handle error, show error message to the user
+      
       showDialog(
         context: context,
         builder: (BuildContext context) {
