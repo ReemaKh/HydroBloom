@@ -96,13 +96,13 @@ class AddPlant extends StatelessWidget {
       'plantId': plantId,
       'plantName': plantName,
       'plantStatus': {
-        'water': false,
-        'fertilizer': false,
-        'sunlight': false,
-        'temperature': false,
-        'humidity': false,
+        'water': true,
+        'fertilizer': true,
+        'sunlight': true,
+        'temperature': true,
+        'humidity': true,
       },
-      //هاذي كلها فولس باي ديفولت
+      //هاذي كلها ترو باي ديفولت
       // الكونيكتيد فولس لين النبته تصير كونيكتيد لسينسور
       'connected': false,
     });

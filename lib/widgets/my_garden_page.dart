@@ -139,7 +139,9 @@ class PlantGardenCard extends StatelessWidget {
                 Icon(Icons.wb_sunny, color: Colors.orange),
                 Icon(Icons.opacity, color: Colors.blue),
                 Icon(Icons.thermostat_outlined, color: Colors.red),
+                Icon(Icons.wind_power_rounded, color: Color.fromARGB(255, 40, 56, 163)),
                 Icon(Icons.spa, color: Colors.green),
+                
               ],
             ),
             IconButton(
