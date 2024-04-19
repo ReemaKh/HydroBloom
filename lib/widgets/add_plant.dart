@@ -103,7 +103,9 @@ class AddPlant extends StatelessWidget {
         'humidity': true,
       },
       //هاذي كلها ترو باي ديفولت
+      
       // الكونيكتيد فولس لين النبته تصير كونيكتيد لسينسور
+      
       'connected': false,
     });
 

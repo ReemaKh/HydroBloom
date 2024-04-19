@@ -11,7 +11,6 @@ class MyGardenPage extends StatefulWidget {
   @override
   _MyGardenPageState createState() => _MyGardenPageState();
 }
-
 class _MyGardenPageState extends State<MyGardenPage> {
   List<String> myGarden = [];
   Map<String, String> plantNames = {};
@@ -22,54 +21,51 @@ class _MyGardenPageState extends State<MyGardenPage> {
     fetchGardenData();
   }
 
-  void fetchGardenData() async {
-    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
-        .collection('userPlant')
-        .where('userId', isEqualTo: widget.userId)
-        .get();
+  Future<void> fetchGardenData() async {
+  QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
+      .collection('userPlant')
+      .where('userId', isEqualTo: widget.userId)
+      .get();
 
-    if (snapshot.docs.isNotEmpty) {
-      setState(() {
-        myGarden = snapshot.docs.map((doc) => doc['plantId'] as String).toList(); // Corrected type assignment
-      });
+  if (snapshot.docs.isNotEmpty) {
+    setState(() {
+      myGarden = snapshot.docs.map((doc) => doc['userPlantId'] as String).toList();
+    });
 
-      await fetchPlantNames();
-    }
+    await fetchPlantNames();
   }
+}
+
 
   Future<void> fetchPlantNames() async {
-    for (String plantId in myGarden) {
-      DocumentSnapshot<Map<String, dynamic>> plantSnapshot =
-          await FirebaseFirestore.instance.collection('plants').doc(plantId).get();
+  for (String userPlantId in myGarden) {
+    DocumentSnapshot<Map<String, dynamic>> userPlantSnapshot =
+        await FirebaseFirestore.instance.collection('userPlant').doc(userPlantId).get();
 
-      if (plantSnapshot.exists) {
-        setState(() {
-          plantNames[plantId] = plantSnapshot.data()!['Name'] as String; // Corrected type assignment
-        });
-      }
-    }
-  }
-
-  void removeFromGarden(String plantId) async {
-    if (myGarden.contains(plantId)) {
+    if (userPlantSnapshot.exists) {
       setState(() {
-        myGarden.remove(plantId);
+        plantNames[userPlantId] = userPlantSnapshot.data()!['plantName'] as String;
       });
-
-      await FirebaseFirestore.instance
-          .collection('userPlant')
-          .where('userId', isEqualTo: widget.userId)
-          .where('plantId', isEqualTo: plantId)
-          .get()
-          .then((snapshot) {
-        if (snapshot.docs.isNotEmpty) {
-          snapshot.docs.first.reference.delete();
-        }
-      });
-
-      await fetchPlantNames();
     }
   }
+}
+
+
+  void removeFromGarden(String userPlantId) async {
+  if (myGarden.contains(userPlantId)) {
+    setState(() {
+      myGarden.remove(userPlantId);
+    });
+
+    await FirebaseFirestore.instance
+        .collection('userPlant')
+        .doc(userPlantId)
+        .delete();
+
+    await fetchPlantNames(); // Refresh plant names after deletion
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -82,11 +78,12 @@ class _MyGardenPageState extends State<MyGardenPage> {
         ),
         itemCount: myGarden.length,
         itemBuilder: (context, index) {
-          String plantId = myGarden[index];
-          String plantName = plantNames[plantId] ?? 'Unknown';
+          String userPlantId = myGarden[index];
+          String plantName = plantNames[userPlantId] ?? 'Unknown';
           return PlantGardenCard(
             plantName: plantName,
-            onDelete: () => removeFromGarden(plantId),
+            onDelete: () => removeFromGarden(userPlantId),
+            userPlantId: userPlantId,
           );
         },
       ),
@@ -94,7 +91,7 @@ class _MyGardenPageState extends State<MyGardenPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddPlant(userId: widget.userId)), // Navigate to AddPlant widget
+            MaterialPageRoute(builder: (context) => AddPlant(userId: widget.userId)),
           );
         },
         child: Icon(Icons.add),
@@ -107,11 +104,13 @@ class _MyGardenPageState extends State<MyGardenPage> {
 class PlantGardenCard extends StatelessWidget {
   final String plantName;
   final VoidCallback onDelete;
+  final String userPlantId;
 
   const PlantGardenCard({
     Key? key,
     required this.plantName,
     required this.onDelete,
+    required this.userPlantId,
   }) : super(key: key);
 
   @override
@@ -134,23 +133,78 @@ class PlantGardenCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Row(
-              children: <Widget>[
-                Icon(Icons.wb_sunny, color: Colors.orange),
-                Icon(Icons.opacity, color: Colors.blue),
-                Icon(Icons.thermostat_outlined, color: Colors.red),
-                Icon(Icons.wind_power_rounded, color: Color.fromARGB(255, 40, 56, 163)),
-                Icon(Icons.spa, color: Colors.green),
-                
-              ],
+            StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('userPlant')
+                  .doc(userPlantId)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data!.exists) {
+                  Map<String, dynamic>? plantData = snapshot.data!.data();
+                  Map<String, dynamic>? plantStatus = plantData?['plantStatus'];
+
+                  return Row(
+                    children: <Widget>[
+                      _buildStatusIcon(
+                        Icons.wb_sunny,
+                        plantStatus?['sunlight'] ?? false,
+                        Colors.orange,
+                      ), //sunlight
+                      _buildStatusIcon(
+                        Icons.opacity,
+                        plantStatus?['water'] ?? false,
+                        Colors.blue,
+                      ), //water
+                      _buildStatusIcon(
+                        Icons.thermostat_outlined,
+                        plantStatus?['temperature'] ?? false,
+                        Colors.red,
+                      ), //temperature
+                      _buildStatusIcon(
+                        Icons.wind_power_rounded,
+                        plantStatus?['humidity'] ?? false,
+                        Color.fromARGB(255, 40, 56, 163),
+                      ), //humidity
+                      _buildStatusIcon(
+                        Icons.spa,
+                        plantStatus?['fertilizer'] ?? false,
+                        Colors.green,
+                      ), //fertilizer
+                    ],
+                  );
+                } else if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else {
+                  return Row(
+                    children: <Widget>[
+                      _buildStatusIcon(Icons.wb_sunny, false, Colors.grey), //sunlight
+                      _buildStatusIcon(Icons.opacity, false, Colors.grey), //water
+                      _buildStatusIcon(Icons.thermostat_outlined, false, Colors.grey), //temperature
+                      _buildStatusIcon(Icons.wind_power_rounded, false, Colors.grey), //humidity
+                      _buildStatusIcon(Icons.spa, false, Colors.grey), //fertilizer
+                    ],
+                  );
+                }
+              },
             ),
             IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
+              icon: Icon(Icons.delete), 
               onPressed: onDelete,
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStatusIcon(
+    IconData icon,
+    bool status,
+    Color color,
+  ) {
+    return Icon(
+      icon,
+      color: status ? color : Colors.grey,
     );
   }
 }

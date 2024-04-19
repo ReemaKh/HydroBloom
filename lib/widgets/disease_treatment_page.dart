@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 class DiseaseTreatmentPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -10,7 +11,8 @@ class DiseaseTreatmentPage extends StatelessWidget {
           DiseaseInfoCard(
             plantName: ' Bamboo',
             symptoms: 'Yellow leaves and black or brown roots.',
-            treatment: 'Use distilled water, change it regularly, and trim damaged roots.',
+            treatment:
+                'Use distilled water, change it regularly, and trim damaged roots.',
           ),
           DiseaseInfoCard(
             plantName: 'sansevieria',
@@ -20,12 +22,14 @@ class DiseaseTreatmentPage extends StatelessWidget {
           DiseaseInfoCard(
             plantName: 'Pothos',
             symptoms: 'Yellow leaves.',
-            treatment: 'Provide ample indirect light and change the water regularly.',
+            treatment:
+                'Provide ample indirect light and change the water regularly.',
           ),
           DiseaseInfoCard(
             plantName: 'Peace Lily',
             symptoms: 'Yellow leaves and brown spots on leaves.',
-            treatment: 'Adjust watering, ensure indirect light, and mist leaves to increase humidity.',
+            treatment:
+                'Adjust watering, ensure indirect light, and mist leaves to increase humidity.',
           ),
         ],
       ),
@@ -54,7 +58,8 @@ class DiseaseInfoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(plantName, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(plantName,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
             Text('Symptoms: $symptoms', style: TextStyle(fontSize: 16)),
             SizedBox(height: 4),
