@@ -62,7 +62,7 @@ class _MyGardenPageState extends State<MyGardenPage> {
         .doc(userPlantId)
         .delete();
 
-    await fetchPlantNames(); // Refresh plant names after deletion
+    await fetchPlantNames();  
   }
 }
 

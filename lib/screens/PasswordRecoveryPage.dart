@@ -77,7 +77,7 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 20.0),
+              SizedBox(height: 30.0),
               Text(
                 'Email',
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -89,11 +89,18 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
                   errorText: _emailErrorText.isNotEmpty ? _emailErrorText : null,
                 ),
               ),
-              SizedBox(height: 20.0),
+              SizedBox(height: 80.0),
               Center(
                 child: ElevatedButton(
                   onPressed: _recoverPassword,
-                  child: Text('Recover Password'),
+                  child: Text('Recover Password',  style: TextStyle(
+                    color: Colors.white,
+                  ),),
+                   style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF009688),
+                padding: EdgeInsets.symmetric(horizontal: 45.0, vertical: 14.0),
+                textStyle: TextStyle(fontSize: 16.0),
+              ),
                 ),
               ),
             ],

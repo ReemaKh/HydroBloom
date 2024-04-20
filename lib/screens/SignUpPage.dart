@@ -145,10 +145,13 @@ class _SignUpPageState extends State<SignUpPage> {
             SizedBox(height: 32.0),
             ElevatedButton(
               onPressed: _signUp,
-              child: Text('Sign Up'),
+              child: Text('Sign Up' ,  style: TextStyle(
+                    color: Colors.white,
+                  ),),
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
-                textStyle: TextStyle(fontSize: 14.0),
+                backgroundColor: Color(0xFF009688),
+                padding: EdgeInsets.symmetric(horizontal: 45.0, vertical: 14.0),
+                textStyle: TextStyle(fontSize: 16.0),
               ),
             ),
           ],

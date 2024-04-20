@@ -10,7 +10,9 @@ class AddPlant extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add New Plant To The Garden'),
+        title: Text('Add New Plant To The Garden' ,style: TextStyle(
+      color: Colors.white,
+    ),),
         backgroundColor: Color(0xFF009688),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),

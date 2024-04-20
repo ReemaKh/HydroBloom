@@ -52,6 +52,7 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_getTitleForSelectedPage(_selectedIndex)),
+        automaticallyImplyLeading: false,
       ),
       body: _pages[_selectedIndex], 
       bottomNavigationBar: ConvexAppBar(
