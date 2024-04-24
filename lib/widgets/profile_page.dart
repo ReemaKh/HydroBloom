@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hydrobloomapp/screens/LogInPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hydrobloomapp/widgets/sensor_connect.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -96,7 +97,7 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SensorsPage()),
+                  MaterialPageRoute(builder: (context) => SensorsPage()), // Navigate to the SensorConnect page
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -108,7 +109,7 @@ class _ProfilePageState extends State<ProfilePage> {
             SizedBox(height: 16),
             ElevatedButton.icon(
               icon: Icon(Icons.support, color: Colors.white),
-              label: Text('Support ', style: TextStyle(color: Colors.white)),
+              label: Text('Support', style: TextStyle(color: Colors.white)),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -314,186 +315,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
   }
 }
 
-class SensorsPage extends StatefulWidget {
-  @override
-  _SensorsPageState createState() => _SensorsPageState();
-}
 
-class _SensorsPageState extends State<SensorsPage> {
-  List<String> plants = [];
-  String? selectedPlant;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchPlants();
-  }
-
-  Future<void> fetchPlants() async {
-    String userId = FirebaseAuth.instance.currentUser!.uid;
-
-    try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('userPlant')
-          .where('userId', isEqualTo: userId)
-          .get();
-
-      List<String> fetchedPlants =
-          snapshot.docs.map((doc) => doc['plantName'].toString()).toList();
-      setState(() {
-        plants = fetchedPlants;
-      });
-    } catch (error) {
-      print('Error fetching plants: $error');
-    }
-  }
-
-  Future<void> _connectSensor() async {
-    if (selectedPlant == null) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Please select a plant to connect.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-      return;
-    }
-
-    String userId = FirebaseAuth.instance.currentUser!.uid;
-    String plantName = selectedPlant!;
-
-    try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('userPlant')
-          .where('userId', isEqualTo: userId)
-          .where('name', isEqualTo: plantName)
-          .limit(1)
-          .get();
-
-      if (snapshot.docs.isNotEmpty) {
-        String plantId = snapshot.docs.first.id;
-
-        await FirebaseFirestore.instance
-            .collection('sensors')
-            .doc(plantId)
-            .set({'userId': userId, 'plantId': plantId});
-
-        await FirebaseFirestore.instance
-            .collection('userPlant')
-            .doc(userId)
-            .collection('plants')
-            .doc(plantId)
-            .update({'connected': true});
-
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Success'),
-              content: Text('Sensor connected successfully.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Error'),
-              content: Text('Plant not found.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      }
-    } catch (error) {
-      print('Error connecting sensor: $error');
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Failed to connect sensor. Please try again.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Sensor Settings'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              'Select a plant to connect:',
-              style: TextStyle(fontSize: 16.0),
-            ),
-            SizedBox(height: 16.0),
-            DropdownButton<String>(
-              value: selectedPlant,
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedPlant = newValue;
-                });
-              },
-              items: plants.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _connectSensor,
-              child: Text('Connect'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class SupportPage extends StatelessWidget {
   @override
