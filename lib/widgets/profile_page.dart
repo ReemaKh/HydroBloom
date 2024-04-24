@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hydrobloomapp/screens/LogInPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
 
@@ -13,6 +12,35 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  late String firstName;
+  late String lastName;
+  late String email;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      setState(() {
+        firstName = snapshot['first_name'];
+        lastName = snapshot['last_name'];
+        email = snapshot['email'];
+      });
+    } catch (error) {
+      print('Error finding user data: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,10 +48,35 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            CircleAvatar(
+              radius: 50,
+              child: Icon(
+                Icons.person,
+                size: 50,
+                color: Colors.white,
+              ),
+              backgroundColor: Color.fromARGB(255, 145, 184, 187),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '$firstName $lastName',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 60, 138, 149),
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              email,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 32),
             ElevatedButton.icon(
               icon: Icon(Icons.account_circle, color: Colors.white),
-              label:
-                  Text('User Settings', style: TextStyle(color: Colors.white)),
+              label: Text('User Settings', style: TextStyle(color: Colors.white)),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -39,8 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
             SizedBox(height: 16),
             ElevatedButton.icon(
               icon: Icon(Icons.settings, color: Colors.white),
-              label: Text('Sensor Settings',
-                  style: TextStyle(color: Colors.white)),
+              label: Text('Sensor Settings', style: TextStyle(color: Colors.white)),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -72,8 +124,7 @@ class _ProfilePageState extends State<ProfilePage> {
             SizedBox(height: 16),
             ElevatedButton.icon(
               icon: Icon(Icons.lock, color: Colors.white),
-              label:
-                  Text('Privacy Policy', style: TextStyle(color: Colors.white)),
+              label: Text('Privacy Policy', style: TextStyle(color: Colors.white)),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -98,7 +149,7 @@ class UserPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('User Page'),
+        title: Text('User Settings'),
       ),
       body: Center(
         child: Column(
@@ -112,9 +163,19 @@ class UserPage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => PasswordResetPage()),
                 );
               },
-              child: Text('Reset Password'),
+              child: Text('Reset Password',
+              style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF009688),
+                  padding: EdgeInsets.symmetric(horizontal: 45.0, vertical: 14.0),
+                  textStyle: TextStyle(fontSize: 16.0),
+                ),
+             
             ),
-            SizedBox(height: 10.0),
+            SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
@@ -123,7 +184,17 @@ class UserPage extends StatelessWidget {
                   (route) => false,
                 );
               },
-              child: Text('Log Out'),
+              child: Text('       Log Out      ',
+              style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color.fromARGB(255, 217, 62, 62),
+                  padding: EdgeInsets.symmetric(horizontal: 45.0, vertical: 14.0),
+                  textStyle: TextStyle(fontSize: 16.0),
+                  
+                ),
             ),
           ],
         ),
@@ -267,7 +338,8 @@ class _SensorsPageState extends State<SensorsPage> {
           .where('userId', isEqualTo: userId)
           .get();
 
-      List<String> fetchedPlants = snapshot.docs.map((doc) => doc['plantName'].toString()).toList();
+      List<String> fetchedPlants =
+          snapshot.docs.map((doc) => doc['plantName'].toString()).toList();
       setState(() {
         plants = fetchedPlants;
       });

@@ -60,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
         items: [
           TabItem(icon: Icons.book, title: 'Guide'),
           TabItem(icon: Icons.notifications, title: 'Alerts'),
-          TabItem(icon: Icons.grass, title: 'My Garden'),
+          TabItem(icon: Icons.local_florist, title: 'My Garden'),
           TabItem(icon: Icons.search, title: 'Discover'),
           TabItem(icon: Icons.person, title: 'Profile'),
         ],
