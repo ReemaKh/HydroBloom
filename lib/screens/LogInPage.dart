@@ -21,63 +21,77 @@ class _LogInPageState extends State<LogInPage> {
     _passwordController.dispose();
   }
 
-  void _login() async {
-    String email = _emailController.text;
-    String password = _passwordController.text;
+ void _login() async {
+  String email = _emailController.text;
+  String password = _passwordController.text;
 
-    if (email.isEmpty) {
-      setState(() {
-        _emailErrorText = 'Email cannot be empty';
-      });
-      return;
-    }
+  if (email.isEmpty) {
+    setState(() {
+      _emailErrorText = 'Email cannot be empty';
+    });
+    return;
+  }
 
-    if (!email.contains('@')) {
-      setState(() {
-        _emailErrorText = 'Invalid email format';
-      });
-      return;
-    }
+  if (!email.contains('@')) {
+    setState(() {
+      _emailErrorText = 'Invalid email format';
+    });
+    return;
+  }
 
-    if (password.isEmpty) {
-      setState(() {
-        _passwordErrorText = 'Password cannot be empty';
-      });
-      return;
-    }
+  if (password.isEmpty) {
+    setState(() {
+      _passwordErrorText = 'Password cannot be empty';
+    });
+    return;
+  }
 
-    try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+  try {
+    UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      if (userCredential.user != null) {
-        if (userCredential.user!.emailVerified) {
-          // User is authenticated and email is verified, navigate to mainscreen
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => MainScreen()),
-          );
-        } else {
-          // Email is not verified, show error message
-          setState(() {
-            _emailErrorText = 'Email is not verified';
-          });
-        }
+    if (userCredential.user != null) {
+      if (userCredential.user!.emailVerified) {
+        // User is authenticated and email is verified, navigate to mainscreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MainScreen()),
+        );
       } else {
+        // Email is not verified, show error message
         setState(() {
-          _passwordErrorText = 'Invalid email or password';
+          _emailErrorText = 'Email is not verified';
+          _passwordErrorText = ''; // Reset password error text
         });
       }
-    } catch (error) {
-      print('Error logging in: $error');
+    } else {
       setState(() {
         _passwordErrorText = 'Invalid email or password';
+        _emailErrorText = ''; // Reset email error text
+      });
+    }
+  } catch (error) {
+    print('Error logging in: $error');
+    if (error is FirebaseAuthException) {
+      setState(() {
+        if (error.code == 'too-many-requests') {
+          _passwordErrorText = 'Access to this account has been temporarily \n disabled due to many failed login attempts. \nYou can immediately restore it by resetting \nyour password or you can try again later.';
+        } else {
+          _passwordErrorText = 'Invalid email or password';
+        }
+        _emailErrorText = ''; // Reset email error text
+      });
+    } else {
+      setState(() {
+        _passwordErrorText = 'Invalid email or password';
+        _emailErrorText = ''; // Reset email error text
       });
     }
   }
+}
 
   void _forgotPassword() {
     Navigator.push(

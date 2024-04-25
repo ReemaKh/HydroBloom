@@ -246,23 +246,29 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
         );
         await user.reauthenticateWithCredential(credential);
         await user.verifyBeforeUpdateEmail(_emailController.text);
+
+        // Update the new email in the users collection
+        String userId = user.uid;
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .update({'email': _emailController.text});
+
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Email Change Requested'),
-              content: Text('A verification email has been sent to your new email address. Please the email to complete the email change process, and log in with the new email.'),
+              content: Text('A verification email has been sent to your new email address. Please check the email to complete the email change process and log in with the new email.'),
               actions: [
                 TextButton(
                   onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            LogInPage()), 
-                  );
-                },
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => LogInPage()),
+                    );
+                  },
                   child: Text('OK'),
                 ),
               ],
@@ -466,8 +472,6 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
     );
   }
 }
-
-
 
 class SupportPage extends StatelessWidget {
   @override
