@@ -92,7 +92,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               SizedBox(height: 20.0),
               TextFormField(
