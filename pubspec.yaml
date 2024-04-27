@@ -35,6 +35,8 @@ dependencies:
   provider: ^6.0.1  # Corrected indentation
   flutter_email_sender: ^6.0.3
   password_strength: ^0.2.0
+  firebase_database: any
+  intl: any
 
 
   # The following adds the Cupertino Icons font to your application.

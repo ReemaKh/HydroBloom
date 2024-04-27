@@ -16,9 +16,10 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late String firstName;
-  late String lastName;
-  late String email;
+  String firstName = '';
+  String lastName = '';
+  String email = '';
+
 
   @override
   void initState() {
