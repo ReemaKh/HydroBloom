@@ -61,33 +61,35 @@ class _LogInPageState extends State<LogInPage> {
           MaterialPageRoute(builder: (context) => MainScreen()),
         );
       } else {
-        // Email is not verified, show error message
+        // Email is not verified
         setState(() {
           _emailErrorText = 'Email is not verified';
-          _passwordErrorText = ''; // Reset password error text
+          _passwordErrorText = ''; 
         });
       }
     } else {
       setState(() {
         _passwordErrorText = 'Invalid email or password';
-        _emailErrorText = ''; // Reset email error text
+        _emailErrorText = ''; 
       });
     }
   } catch (error) {
     print('Error logging in: $error');
     if (error is FirebaseAuthException) {
       setState(() {
+        //  رساله من فاير بيس نفسو
+        // فايربيس اذا وصل عدد مرات كتابه الباسورد غلط ٥ مرات يسوي لوووك للاكاونت
         if (error.code == 'too-many-requests') {
           _passwordErrorText = 'Access to this account has been temporarily \n disabled due to many failed login attempts. \nYou can immediately restore it by resetting \nyour password or you can try again later.';
         } else {
           _passwordErrorText = 'Invalid email or password';
         }
-        _emailErrorText = ''; // Reset email error text
+        _emailErrorText = ''; 
       });
     } else {
       setState(() {
         _passwordErrorText = 'Invalid email or password';
-        _emailErrorText = ''; // Reset email error text
+        _emailErrorText = ''; 
       });
     }
   }

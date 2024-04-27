@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hydrobloomapp/screens/LogInPage.dart';
 
 class PasswordRecoveryPage extends StatefulWidget {
   @override
@@ -30,7 +31,7 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Password Recovery'),
-            content: Text('Password reset email has been sent to $email'),
+            content: Text('Password reset email has been sent to $email , Follow the email instriction and Log in with the new password'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -54,7 +55,10 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                   Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LogInPage()),
+                );
                 },
                 child: Text('OK'),
               ),

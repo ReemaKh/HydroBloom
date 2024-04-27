@@ -68,7 +68,6 @@ class _SignUpPageState extends State<SignUpPage> {
           'first_name': firstName,
           'last_name': lastName,
           'user_type': 'user', // by default
-          //'locked': false, // by defult
         });
 
         // Send email verification
