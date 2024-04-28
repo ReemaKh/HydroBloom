@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class SensorsPage extends StatefulWidget {
-  const SensorsPage({Key? key}) : super(key: key);
+class sensorConnect extends StatefulWidget {
+  const sensorConnect({Key? key}) : super(key: key);
 
   @override
-  _SensorsPageState createState() => _SensorsPageState();
+  _sensorConnectState createState() => _sensorConnectState();
 }
 
-class _SensorsPageState extends State<SensorsPage> {
+class _sensorConnectState extends State<sensorConnect> {
   List<String> availableSensors = [];
   List<String> userPlant = [];
   String? selectedSensor;
@@ -193,7 +193,7 @@ Future<String> getUserPlantId(String userId, String selectedPlant) async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sensor Settings'),
+        title: Text('Connect Sensor'),
       ),
       body: Padding(
         padding: EdgeInsets.all(120.0),

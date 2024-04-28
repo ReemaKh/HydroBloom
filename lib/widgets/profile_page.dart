@@ -5,7 +5,7 @@ import 'package:hydrobloomapp/screens/LogInPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hydrobloomapp/widgets/sensor_connect.dart';
 import 'package:hydrobloomapp/screens/PasswordRecoveryPage.dart';
-
+import 'package:hydrobloomapp/widgets/sensor_disconnect.dart';
 import 'package:hydrobloomapp/screens/ChangeEmailPage.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -219,6 +219,63 @@ class UserPage extends StatelessWidget {
                 backgroundColor: Color.fromARGB(255, 214, 63, 63),
                 padding: EdgeInsets.symmetric(horizontal: 45.0, vertical: 14.0),
                 textStyle: TextStyle(fontSize: 16.0),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SensorsPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Sensor Settings'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => sensorConnect()),
+                );
+              },
+              child: Text(
+                'Connect Sensor',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(200, 48),
+                backgroundColor: Color(0xFF009688),
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SensorDisconnect()),
+                );
+              },
+              child: Text(
+                'Disconnect Sensor',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(200, 48),
+                backgroundColor: Color.fromARGB(255, 160, 86, 136),
               ),
             ),
           ],
