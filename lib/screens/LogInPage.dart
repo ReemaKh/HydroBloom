@@ -14,12 +14,7 @@ class _LogInPageState extends State<LogInPage> {
   TextEditingController _passwordController = TextEditingController();
   String _emailErrorText = 'This email is wrong, Try again! or sign up';
   String _passwordErrorText = 'Wrong password, Try again!';
-  @override
-  void dispose() {
-    super.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-  }
+  
 
  void _login() async {
   String email = _emailController.text;
