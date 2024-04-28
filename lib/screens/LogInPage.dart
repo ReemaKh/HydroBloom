@@ -69,8 +69,8 @@ class _LogInPageState extends State<LogInPage> {
       }
     } else {
       setState(() {
-        _passwordErrorText = 'Invalid email or password';
-        _emailErrorText = ''; 
+        _passwordErrorText = 'Invalid password';
+        _emailErrorText = 'Invalid email'; 
       });
     }
   } catch (error) {
@@ -82,14 +82,14 @@ class _LogInPageState extends State<LogInPage> {
         if (error.code == 'too-many-requests') {
           _passwordErrorText = 'Access to this account has been temporarily \n disabled due to many failed login attempts. \nYou can immediately restore it by resetting \nyour password or you can try again later.';
         } else {
-          _passwordErrorText = 'Invalid email or password';
+          _passwordErrorText = 'Invalid password';
         }
-        _emailErrorText = ''; 
+        _emailErrorText = 'Invalid email'; 
       });
     } else {
       setState(() {
-        _passwordErrorText = 'Invalid email or password';
-        _emailErrorText = ''; 
+        _passwordErrorText = 'Invalid password';
+        _emailErrorText = 'Invalid email'; 
       });
     }
   }
