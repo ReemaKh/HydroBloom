@@ -25,9 +25,15 @@ class _SignUpPageState extends State<SignUpPage> {
     String firstName = _firstNameController.text;
     String lastName = _lastNameController.text;
 
-    if (email.isEmpty || !email.contains('@')) {
+    if (email.isEmpty) {
       setState(() {
-        _emailErrorText = 'Invalid email format';
+        _emailErrorText = 'Email address cannot be empty';
+      });
+      return;
+    }
+    if (!email.contains('@') || !email.contains('.com') ) {
+      setState(() {
+        _emailErrorText = 'The email address is badly formated.';
       });
       return;
     }

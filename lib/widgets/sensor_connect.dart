@@ -67,24 +67,21 @@ Future<void> fetchUserPlant() async {
 
  Future<void> connectSensorToPlant(String selectedSensor, String selectedPlant) async {
   try {
-    // Fetch the user ID
+    
     String userId = FirebaseAuth.instance.currentUser!.uid;
-
-    // Fetch the userPlantId based on the selected plant
     String userPlantId = await getUserPlantId(userId, selectedPlant);
 
-    // Check if the selected sensor is already connected to any plant
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('sensors')
         .where('name', isEqualTo: selectedSensor)
         .get();
 
     if (snapshot.docs.isNotEmpty) {
-      // Iterate over the documents to find if any sensor is already connected to a plant
+      
       for (QueryDocumentSnapshot doc in snapshot.docs) {
-        // Check if doc.data() is not null before accessing it
+        
         if (doc.data() != null && (doc.data() as Map<String, dynamic>).containsKey('userPlantId') && doc['userPlantId'] != null) {
-          // If the sensor is already connected, show error message and return
+          
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -130,7 +127,6 @@ Future<void> fetchUserPlant() async {
         .doc(userPlantId)
         .update({'connected': true});
 
-    // Show success message
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -149,7 +145,7 @@ Future<void> fetchUserPlant() async {
       },
     );
   } catch (error) {
-    // Show error message if any error occurs during the process
+    
     print('Error connecting sensor to plant: $error');
     showDialog(
       context: context,
