@@ -66,9 +66,13 @@ Future<void> fetchUserPlant() async {
 }
 
  Future<void> connectSensorToPlant(String selectedSensor, String selectedPlant) async {
-  String userId = FirebaseAuth.instance.currentUser!.uid;
-
   try {
+    // Fetch the user ID
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+
+    // Fetch the userPlantId based on the selected plant
+    String userPlantId = await getUserPlantId(userId, selectedPlant);
+
     // Check if the selected sensor is already connected to any plant
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('sensors')
@@ -104,7 +108,7 @@ Future<void> fetchUserPlant() async {
     }
 
     // If the execution reaches here, the sensor is not connected to any plant
-    // Update sensor document with userPlantId only if it exists
+    // Update sensor document with userPlantId
     await FirebaseFirestore.instance
         .collection('sensors')
         .where('name', isEqualTo: selectedSensor)
@@ -113,37 +117,18 @@ Future<void> fetchUserPlant() async {
         .then((snapshot) {
       if (snapshot.docs.isNotEmpty) {
         String sensorId = snapshot.docs.first.id;
-        Map<String, dynamic> dataToUpdate = {'userPlantId': userId};
-
-        // Check if doc.data() is not null before accessing it
-        if (snapshot.docs.first.data() != null && (snapshot.docs.first.data() as Map<String, dynamic>).containsKey('userPlantId')) {
-          // If the field doesn't exist, remove it from the data to update
-          dataToUpdate.remove('userPlantId');
-        }
-
         FirebaseFirestore.instance
             .collection('sensors')
             .doc(sensorId)
-            .update(dataToUpdate);
+            .update({'userPlantId': userPlantId});
       }
     });
 
     // Update userPlant document with connected field
     await FirebaseFirestore.instance
         .collection('userPlant')
-        .where('userId', isEqualTo: userId)
-        .where('plantName', isEqualTo: selectedPlant)
-        .limit(1)
-        .get()
-        .then((snapshot) {
-      if (snapshot.docs.isNotEmpty) {
-        String userPlantId = snapshot.docs.first.id;
-        FirebaseFirestore.instance
-            .collection('userPlant')
-            .doc(userPlantId)
-            .update({'connected': true});
-      }
-    });
+        .doc(userPlantId)
+        .update({'connected': true});
 
     // Show success message
     showDialog(
@@ -186,6 +171,26 @@ Future<void> fetchUserPlant() async {
   }
 }
 
+// Function to get userPlantId based on the selected plant
+Future<String> getUserPlantId(String userId, String selectedPlant) async {
+  String userPlantId = '';
+  try {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('userPlant')
+        .where('userId', isEqualTo: userId)
+        .where('plantName', isEqualTo: selectedPlant)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      userPlantId = snapshot.docs.first.id;
+    }
+  } catch (error) {
+    print('Error fetching user plant ID: $error');
+  }
+  return userPlantId;
+}
+
 
 
   @override
@@ -195,9 +200,9 @@ Future<void> fetchUserPlant() async {
         title: Text('Sensor Settings'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(120.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               'Select a sensor:',
@@ -251,7 +256,15 @@ fontWeight: FontWeight.bold,
                   connectSensorToPlant(selectedSensor!, selectedPlant!);
                 }
               },
-              child: Text('Connect'),
+              child: Text('Connect',style: TextStyle(
+                    color: Color.fromARGB(255, 255, 255, 255),
+                  ),
+                ),style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF009688),
+                  padding: EdgeInsets.symmetric(horizontal: 45.0, vertical: 14.0),
+                  textStyle: TextStyle(fontSize: 16.0),
+                ),
+              
             ),
           ],
         ),

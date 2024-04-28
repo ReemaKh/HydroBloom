@@ -28,8 +28,7 @@ class PlantCareCard extends StatefulWidget {
 
 var ec, humidity, lightIntensity, ph, tds, temperature;
 getAllSensorData() async {
-  final databaseReference =
-      FirebaseDatabase.instance.reference().child('sensor_reading');
+  final databaseReference = FirebaseDatabase.instance.ref().child('sensor_reading');
 
   DatabaseEvent event = await databaseReference.once();
 
