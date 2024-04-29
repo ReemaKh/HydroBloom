@@ -12,83 +12,81 @@ class LogInPage extends StatefulWidget {
 class _LogInPageState extends State<LogInPage> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
-  String _emailErrorText = 'This email is wrong, Try again! or sign up';
-  String _passwordErrorText = 'Wrong password, Try again!';
-  
+  String _emailErrorText = '';
+  String _passwordErrorText = '';
 
- void _login() async {
-  String email = _emailController.text;
-  String password = _passwordController.text;
+  void _login() async {
+    String email = _emailController.text;
+    String password = _passwordController.text;
 
-  if (email.isEmpty) {
-    setState(() {
-      _emailErrorText = 'Email cannot be empty';
-    });
-    return;
-  }
+    if (email.isEmpty) {
+      setState(() {
+        _emailErrorText = 'Email cannot be empty';
+      });
+      return;
+    }
 
-  if (!email.contains('@')) {
-    setState(() {
-      _emailErrorText = 'Invalid email format';
-    });
-    return;
-  }
+    if (!email.contains('@')) {
+      setState(() {
+        _emailErrorText = 'Invalid email format';
+      });
+      return;
+    }
 
-  if (password.isEmpty) {
-    setState(() {
-      _passwordErrorText = 'Password cannot be empty';
-    });
-    return;
-  }
+    if (password.isEmpty) {
+      setState(() {
+        _passwordErrorText = 'Password cannot be empty';
+      });
+      return;
+    }
 
-  try {
-    UserCredential userCredential =
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    if (userCredential.user != null) {
-      if (userCredential.user!.emailVerified) {
-        // User is authenticated and email is verified, navigate to mainscreen
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => MainScreen()),
-        );
+      if (userCredential.user != null) {
+        if (userCredential.user!.emailVerified) {
+          // User is authenticated and email is verified, navigate to mainscreen
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MainScreen()),
+          );
+        } else {
+          // Email is not verified
+          setState(() {
+            _emailErrorText = 'Email is not verified';
+            _passwordErrorText = '';
+          });
+        }
       } else {
-        // Email is not verified
         setState(() {
-          _emailErrorText = 'Email is not verified';
-          _passwordErrorText = ''; 
+          _passwordErrorText = 'Invalid password';
+          _emailErrorText = 'Invalid email';
         });
       }
-    } else {
-      setState(() {
-        _passwordErrorText = 'Invalid password';
-        _emailErrorText = 'Invalid email'; 
-      });
-    }
-  } catch (error) {
-    print('Error logging in: $error');
-    if (error is FirebaseAuthException) {
-      setState(() {
-        //  رساله من فاير بيس نفسو
-        // فايربيس اذا وصل عدد مرات كتابه الباسورد غلط ٥ مرات يسوي لوووك للاكاونت
-        if (error.code == 'too-many-requests') {
-          _passwordErrorText = 'Access to this account has been temporarily \n disabled due to many failed login attempts. \nYou can immediately restore it by resetting \nyour password or you can try again later.';
-        } else {
-          _passwordErrorText = 'Wrong password, Try again!';
-        }
-        _emailErrorText = 'Invalid email'; 
-      });
-    } else {
-      setState(() {
-        _passwordErrorText = 'Invalid password';
-        _emailErrorText = 'Invalid email'; 
-      });
+    } catch (error) {
+      print('Error logging in: $error');
+      if (error is FirebaseAuthException) {
+        setState(() {
+          if (error.code == 'too-many-requests') {
+            _passwordErrorText =
+                'Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.';
+          } else {
+            _passwordErrorText = 'Wrong password, Try again!';
+          }
+          _emailErrorText = 'Invalid email';
+        });
+      } else {
+        setState(() {
+          _passwordErrorText = 'Invalid password';
+          _emailErrorText = 'Invalid email';
+        });
+      }
     }
   }
-}
 
   void _forgotPassword() {
     Navigator.push(

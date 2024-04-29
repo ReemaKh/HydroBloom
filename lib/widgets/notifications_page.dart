@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 String userId = FirebaseAuth.instance.currentUser!.uid;
@@ -28,7 +28,8 @@ class PlantCareCard extends StatefulWidget {
 
 var ec, humidity, lightIntensity, ph, tds, temperature;
 getAllSensorData() async {
-  final databaseReference = FirebaseDatabase.instance.ref().child('sensor_reading');
+  final databaseReference =
+      FirebaseDatabase.instance.reference().child('sensor_reading');
 
   DatabaseEvent event = await databaseReference.once();
 
@@ -38,11 +39,10 @@ getAllSensorData() async {
   ph = event.snapshot.child("Ph").value;
   tds = event.snapshot.child("TDS").value;
   temperature = event.snapshot.child("Temperature").value;
-
-  print("------------------------------------\n$temperature");
-  print("------------------------------------\n$ec");
-  print("------------------------------------\n$tds");
 }
+
+List<String> tmsgList = [];
+List<String> submsgList = [];
 
 class _PlantCareCardState extends State<PlantCareCard> {
   void initState() {
@@ -66,7 +66,7 @@ class _PlantCareCardState extends State<PlantCareCard> {
               onPressed: () {
                 getAllSensorData();
               },
-              icon: Icon(Icons.abc),
+              icon: Icon(Icons.notifications_active),
             ),
             Text(
               widget.title,
@@ -106,45 +106,125 @@ class NotificationsPage extends StatefulWidget {
   _NotificationsPageState createState() => _NotificationsPageState();
 }
 
+Future<void> updatePlantStatus(id, Map<String, dynamic> state) async {
+  await FirebaseFirestore.instance
+      .collection('userPlant')
+      .doc(id)
+      .update({'plantStatus': state});
+}
+
 class _NotificationsPageState extends State<NotificationsPage> {
-  Future<void> printAllValuesInUserPlantCollection(
-      Map<String, dynamic> state) async {
+  Future<void> printAllValuesInUserPlantCollection(plantId, name, docid) async {
     final QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('userPlant').get();
+        await FirebaseFirestore.instance.collection('plants').get();
 
-    for (final QueryDocumentSnapshot document in snapshot.docs) {
-      final Map<String, dynamic> data =
-          (document.data() as Map<String, dynamic>);
+    for (final DocumentSnapshot document in snapshot.docs) {
+      if (document.id == plantId) {
+        final data = document.data() as Map<String, dynamic>;
+        Map<String, dynamic> normalCondition = data['Normal condition'];
+        final ecMax = normalCondition['ec']['max'];
+        final ecMin = normalCondition['ec']['min'];
+        final humidityMax = normalCondition['humidity']['max'];
+        final humidityMin = normalCondition['humidity']['min'];
+        final lightMax = normalCondition['light']['max'];
+        final lightMin = normalCondition['light']['min'];
+        final phMax = normalCondition['ph']['max'];
+        final phMin = normalCondition['ph']['min'];
 
-      final QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('userPlant')
-          .where('userId', isEqualTo: userId)
-          .get();
+        final tdsMax = normalCondition['tds']['max'];
+        final tdsMin = normalCondition['tds']['min'];
 
-      final WriteBatch batch = FirebaseFirestore.instance.batch();
-
-      for (final DocumentSnapshot document in snapshot.docs) {
-        final DocumentReference docRef =
-            FirebaseFirestore.instance.collection('userPlant').doc(document.id);
-        batch.update(docRef, {'plantStatus': state});
+        final tempMax = normalCondition['temp']['max'];
+        final tempMin = normalCondition['temp']['min'];
+        tmsgList.clear();
+        if (lightIntensity < lightMin) {
+          tmsgList.add('light 💡:your $name plant needs lights');
+          submsgList.add('move your $name plant closer to the sun');
+          updatePlantStatus(docid, {
+            'fertilizer': true,
+            'humidity': true,
+            'sunlight': false,
+            'temperature': true,
+            'water': true,
+          });
+        } else if (lightIntensity > lightMax) {
+          tmsgList.add('light 💡:your $name plant has enough of light time');
+          submsgList.add('move your $name plant away from the sun');
+          updatePlantStatus(docid, {
+            'fertilizer': true,
+            'humidity': true,
+            'sunlight': false,
+            'temperature': true,
+            'water': true,
+          });
+        } else if (ph > phMax || ph < phMin) {
+          tmsgList.add('water 💧: your $name plant needs water');
+          submsgList.add('change the water for your $name plant');
+          updatePlantStatus(docid, {
+            'fertilizer': true,
+            'humidity': true,
+            'sunlight': true,
+            'temperature': true,
+            'water': false,
+          });
+        } else if (ec > ecMax || ec < ecMin || tds > tdsMax || tds < tdsMin) {
+          tmsgList.add('Fertilize 🪴: your $name plant is hungry');
+          submsgList.add('Fertilize your $name plant');
+          updatePlantStatus(docid, {
+            'fertilizer': false,
+            'humidity': true,
+            'sunlight': true,
+            'temperature': true,
+            'water': true,
+          });
+        } else if (temperature > tempMax) {
+          tmsgList.add('Temperature 🌡️ : your $name plant is feeling hot');
+          submsgList.add('move your $name plant to a colder place');
+          updatePlantStatus(docid, {
+            'fertilizer': true,
+            'humidity':  true,
+            'sunlight': true,
+            'temperature': false,
+            'water': true,
+          });
+        } else if (temperature < tempMin) {
+          tmsgList.add('Temperature 🌡️ : your $name plant is feeling cold');
+          submsgList.add('move your $name plant to a warmer place');
+          updatePlantStatus(docid, {
+            'fertilizer': true,
+            'humidity': true,
+            'sunlight': true,
+            'temperature': false,
+            'water': true,
+          });
+        } else if (humidity > humidityMax || humidity < humidityMin) {
+          tmsgList.add('Humidity 🌪️ :your $name  plant needs some fresh air');
+          submsgList.add('open the window so your $name plant can breathe');
+          updatePlantStatus(docid, {
+            'fertilizer': true,
+            'humidity': false,
+            'sunlight': true,
+            'temperature': true,
+            'water': true,
+          });
+        }
       }
-
-      await batch.commit();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    String userId = FirebaseAuth.instance.currentUser!.uid;
     final DateTime now = DateTime.now();
     final DateFormat formatter = DateFormat('HH:mm');
     final String formattedTime = formatter.format(now);
     final DateTime startTime = formatter.parse('07:00');
     final DateTime endTime = formatter.parse('18:00');
-    late String tmsg = '', submsg = '';
-
+    var data;
     return (now.isAfter(startTime) || now.isBefore(endTime))
         ? StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('plants').snapshots(),
+            stream:
+                FirebaseFirestore.instance.collection('userPlant').snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
@@ -161,102 +241,35 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         onPressed: () async {
                           await getAllSensorData();
                           setState(() {});
+
+                          // submsg = tmsg = "";
                         },
-                        child: Text("ref")),
+                        child: Icon(Icons.refresh)),
                     Expanded(
                       child: ListView.builder(
                           itemCount: snapshot.data!.docs.length,
                           itemBuilder: (context, index) {
-                            final data = snapshot.data!.docs[index];
-                            final name = data['Name'];
-                            final String documentId =
-                                snapshot.data!.docs[index].id;
-                            Map<String, dynamic> normalCondition =
-                                data['Normal condition'];
-                            final ecMax = normalCondition['ec']['max'];
-                            final ecMin = normalCondition['ec']['min'];
-                            final humidityMax =
-                                normalCondition['humidity']['max'];
-                            final humidityMin =
-                                normalCondition['humidity']['min'];
-                            final lightMax = normalCondition['light']['max'];
-                            final lightMin = normalCondition['light']['min'];
-                            final phMax = normalCondition['ph']['max'];
-                            final phMin = normalCondition['ph']['min'];
-
-                            final tdsMax = normalCondition['tds']['max'];
-                            final tdsMin = normalCondition['tds']['min'];
-
-                            final tempMax = normalCondition['temp']['max'];
-                            final tempMin = normalCondition['temp']['min'];
-                            if (lightIntensity < lightMin) {
-                              tmsg = "light 💡:your $name   plant needs lights";
-                              submsg =
-                                  "move your $name plant closer to the sun ";
-                            } else if (lightIntensity > lightMax) {
-                              tmsg =
-                                  "light 💡:your $name plant has enough of light time ";
-                              submsg =
-                                  "move your $name plant away from the sun ";
-                              printAllValuesInUserPlantCollection({
-                                'sunlight': true,
-                              });
-                            } else if (ph > phMax || ph < phMin) {
-                              tmsg = "water 💧: your $name plant needs water";
-                              submsg = "change the water for your $name plant";
-                              printAllValuesInUserPlantCollection({
-                                'water': true,
-                              });
-                            } else if (ec > ecMax ||
-                                ec < ecMin ||
-                                tds > tdsMax ||
-                                tds < tdsMin) {
-                              tmsg =
-                                  "Fertilize 🪴: your $name plant is hungry ";
-                              submsg = "Fertilize your $name plant ";
+                            data = snapshot.data!.docs[index];
+                            if (data["connected"] == true &&
+                                data["userId"] == userId) {
                               printAllValuesInUserPlantCollection(
-                                  {'fertilizer': true});
-                            } else if (temperature > tempMax) {
-                              tmsg =
-                                  "Temperature 🌡️ : your $name plant is felling hot";
-                              submsg =
-                                  "move your $name plant to a colder place ";
-                              printAllValuesInUserPlantCollection({
-                                'temperature': true,
-                              });
-                            } else if (temperature < tempMin) {
-                              tmsg =
-                                  "Temperature 🌡️ : your $name plant is felling cold";
-                              submsg =
-                                  "move your $name  plant to a wormer place ";
-                              printAllValuesInUserPlantCollection({
-                                'temperature': true,
-                              });
-                            } else if (humidity > humidityMax ||
-                                humidity < humidityMin) {
-                              tmsg =
-                                  "Humidity 🌪️ :  plant needs some fresh air";
-                              submsg =
-                                  "open the window so your $name plant can breathe";
-                              printAllValuesInUserPlantCollection({
-                                'temperature': true,
-                              });
-                            } else {
-                              tmsg = "";
-                              submsg = "";
-                              // Update the "plantState" field in the "userPlant" document
-                            }
-                            return InkWell(
-                              child: PlantCareCard(
-                                title: "$tmsg",
-                                // ? 'your $name $plantName Needs Water'
-                                // : 'hhhh',
-                                subtitle: "$submsg",
-                                icon: Icons.invert_colors,
-                                timeAgo: '2h ago',
-                              ),
-                              onTap: () {},
-                            );
+                                  data["plantId"],
+                                  data["plantName"],
+                                  snapshot.data!.docs[index].id);
+
+                             return Column(
+  children: tmsgList.map((title) {
+    return PlantCareCard(
+      title: title,
+      subtitle: submsgList[index % submsgList.length],
+      icon: Icons.error_outline,
+       //Color.fromRGBO(160, 86, 136, 1),
+      timeAgo: '',
+    );
+  }).toList(),
+);
+                            } else
+                              return Container();
                           }),
                     ),
                   ],

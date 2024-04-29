@@ -30,7 +30,7 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Password Recovery'),
+            title: Text('Reset Password'),
             content: Text('Password reset email has been sent to $email , Follow the email instriction and Log in with the new password'),
             actions: [
               TextButton(
@@ -73,7 +73,7 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Password Recovery'),
+        title: Text('Reset Password'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -97,7 +97,7 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
               Center(
                 child: ElevatedButton(
                   onPressed: _recoverPassword,
-                  child: Text('Recover Password',  style: TextStyle(
+                  child: Text('Reset Password',  style: TextStyle(
                     color: Colors.white,
                   ),),
                    style: ElevatedButton.styleFrom(
