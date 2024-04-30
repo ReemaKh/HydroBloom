@@ -7,24 +7,41 @@ class SensorDisconnect extends StatefulWidget {
   @override
   _SensorDisconnectState createState() => _SensorDisconnectState();
 }
-
 class _SensorDisconnectState extends State<SensorDisconnect> {
   List<String> connectedSensors = [];
   String? selectedSensor;
+  String? userId;
+  List<String> userPlantIds = [];
+
   @override
   void initState() {
     super.initState();
-    fetchConnectedSensors();
+    fetchUserPlantIds();
+  }
+
+  Future<void> fetchUserPlantIds() async {
+    try {
+      userId = FirebaseAuth.instance.currentUser!.uid;
+
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+         .collection('userPlant')
+         .where('userId', isEqualTo: userId)
+         .get();
+
+      userPlantIds = snapshot.docs.map((doc) => doc.id).toList();
+
+      fetchConnectedSensors();
+    } catch (error) {
+      print('Error fetching user plant ids: $error');
+    }
   }
 
   Future<void> fetchConnectedSensors() async {
     try {
-      String userId = FirebaseAuth.instance.currentUser!.uid;
-
       QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('sensors')
-          .where('userPlantId', isNotEqualTo: null)
-          .get();
+         .collection('sensors')
+         .where('userPlantId', whereIn: userPlantIds)
+         .get();
 
       List<String> fetchedSensors =
           snapshot.docs.map((doc) => doc['name'].toString()).toList();

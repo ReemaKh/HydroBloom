@@ -257,7 +257,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         onPressed: () async {
                           await getAllSensorData();
                           setState(() {});
-
+//
                           // submsg = tmsg = "";
                         },
                         child: Icon(Icons.refresh)),
