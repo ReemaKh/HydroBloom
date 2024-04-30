@@ -155,12 +155,24 @@ class _NotificationsPageState extends State<NotificationsPage> {
             'sunlight': false,
            
           });
+          } else if (lightIntensity < lightMax && lightIntensity > lightMin){
+          updatePlantStatus(docid, {
+            
+            'sunlight': true,
+
+          });
         } else if (ph > phMax || ph < phMin) {
           tmsgList.add('water 💧: your $name plant needs water');
           submsgList.add('change the water for your $name plant');
           updatePlantStatus(docid, {
            
             'water': false,
+          });
+          } else if (ph < phMax && ph > phMin){
+          updatePlantStatus(docid, {
+            
+            'water': true,
+
           });
         } else if (ec > ecMax || ec < ecMin || tds > tdsMax || tds < tdsMin) {
           tmsgList.add('Fertilize 🪴: your $name plant is hungry');
@@ -169,6 +181,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
             'fertilizer': false,
             
           });
+          } else if (ec < ecMax && ec > ecMin || tds < tdsMax && tds > tdsMin){
+          updatePlantStatus(docid, {
+            
+             'fertilizer': true,
+
+          });
+          
         } else if (temperature > tempMax) {
           tmsgList.add('Temperature 🌡️ : your $name plant is feeling hot');
           submsgList.add('move your $name plant to a colder place');
@@ -185,6 +204,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
             'temperature': false,
             
           });
+           } else if (temperature > tempMin && temperature < tempMax){
+          updatePlantStatus(docid, {
+            
+             'temperature': true,
+
+          });
         } else if (humidity > humidityMax || humidity < humidityMin) {
           tmsgList.add('Humidity 🌪️ :your $name  plant needs some fresh air');
           submsgList.add('open the window so your $name plant can breathe');
@@ -193,10 +218,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
             'humidity': false,
             
           });
-        }
+        } else if (humidity < humidityMax && humidity > humidityMin){
+          updatePlantStatus(docid, {
+            
+             'humidity': true,
+
+          });
       }
     }
-  }
+  }}
 
   @override
   Widget build(BuildContext context) {
