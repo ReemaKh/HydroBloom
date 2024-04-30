@@ -66,7 +66,7 @@ class _PlantCareCardState extends State<PlantCareCard> {
               onPressed: () {
                 getAllSensorData();
               },
-              icon: Icon(Icons.notifications_active),
+              icon: Icon(Icons.notifications_active, color: Color.fromRGBO(160, 86, 136, 1),),
             ),
             Text(
               widget.title,
@@ -79,7 +79,7 @@ class _PlantCareCardState extends State<PlantCareCard> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Icon(widget.icon, size: 24.0, color: Colors.black54),
+                Icon(widget.icon, size: 24.0, color: Color.fromRGBO(160, 86, 136, 1),),
                 SizedBox(width: 10.0),
                 Expanded(
                   child: Text(
@@ -260,7 +260,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 //
                           // submsg = tmsg = "";
                         },
-                        child: Icon(Icons.refresh)),
+                        child: Icon(Icons.refresh, color: Color.fromRGBO(160, 86, 136, 1),)),
                     Expanded(
                       child: ListView.builder(
                           itemCount: snapshot.data!.docs.length,
@@ -280,7 +280,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                     subtitle:
                                         submsgList[index % submsgList.length],
                                     icon: Icons.error_outline,
-                                    //Color.fromRGBO(160, 86, 136, 1),
+                                    
                                     timeAgo: '',
                                   );
                                 }).toList(),

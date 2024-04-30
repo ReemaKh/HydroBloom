@@ -55,7 +55,7 @@ class GuideItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(Icons.filter_vintage_outlined),
+            Icon(Icons.filter_vintage_outlined,color: Color.fromRGBO(160, 86, 136, 1),),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
