@@ -136,35 +136,30 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
         final tempMax = normalCondition['temp']['max'];
         final tempMin = normalCondition['temp']['min'];
-        tmsgList.clear();
+
+        // tmsgList.clear();
+
         if (lightIntensity < lightMin) {
           tmsgList.add('light 💡:your $name plant needs lights');
           submsgList.add('move your $name plant closer to the sun');
           updatePlantStatus(docid, {
-            'fertilizer': true,
-            'humidity': true,
+            
             'sunlight': false,
-            'temperature': true,
-            'water': true,
+            
           });
         } else if (lightIntensity > lightMax) {
           tmsgList.add('light 💡:your $name plant has enough of light time');
           submsgList.add('move your $name plant away from the sun');
           updatePlantStatus(docid, {
-            'fertilizer': true,
-            'humidity': true,
+            
             'sunlight': false,
-            'temperature': true,
-            'water': true,
+           
           });
         } else if (ph > phMax || ph < phMin) {
           tmsgList.add('water 💧: your $name plant needs water');
           submsgList.add('change the water for your $name plant');
           updatePlantStatus(docid, {
-            'fertilizer': true,
-            'humidity': true,
-            'sunlight': true,
-            'temperature': true,
+           
             'water': false,
           });
         } else if (ec > ecMax || ec < ecMin || tds > tdsMax || tds < tdsMin) {
@@ -172,40 +167,31 @@ class _NotificationsPageState extends State<NotificationsPage> {
           submsgList.add('Fertilize your $name plant');
           updatePlantStatus(docid, {
             'fertilizer': false,
-            'humidity': true,
-            'sunlight': true,
-            'temperature': true,
-            'water': true,
+            
           });
         } else if (temperature > tempMax) {
           tmsgList.add('Temperature 🌡️ : your $name plant is feeling hot');
           submsgList.add('move your $name plant to a colder place');
           updatePlantStatus(docid, {
-            'fertilizer': true,
-            'humidity':  true,
-            'sunlight': true,
+           
             'temperature': false,
-            'water': true,
+        
           });
         } else if (temperature < tempMin) {
           tmsgList.add('Temperature 🌡️ : your $name plant is feeling cold');
           submsgList.add('move your $name plant to a warmer place');
           updatePlantStatus(docid, {
-            'fertilizer': true,
-            'humidity': true,
-            'sunlight': true,
+            
             'temperature': false,
-            'water': true,
+            
           });
         } else if (humidity > humidityMax || humidity < humidityMin) {
           tmsgList.add('Humidity 🌪️ :your $name  plant needs some fresh air');
           submsgList.add('open the window so your $name plant can breathe');
           updatePlantStatus(docid, {
-            'fertilizer': true,
+          
             'humidity': false,
-            'sunlight': true,
-            'temperature': true,
-            'water': true,
+            
           });
         }
       }
@@ -257,17 +243,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   data["plantName"],
                                   snapshot.data!.docs[index].id);
 
-                             return Column(
-  children: tmsgList.map((title) {
-    return PlantCareCard(
-      title: title,
-      subtitle: submsgList[index % submsgList.length],
-      icon: Icons.error_outline,
-       //Color.fromRGBO(160, 86, 136, 1),
-      timeAgo: '',
-    );
-  }).toList(),
-);
+                              return Column(
+                                children: tmsgList.map((title) {
+                                  return PlantCareCard(
+                                    title: title,
+                                    subtitle:
+                                        submsgList[index % submsgList.length],
+                                    icon: Icons.error_outline,
+                                    //Color.fromRGBO(160, 86, 136, 1),
+                                    timeAgo: '',
+                                  );
+                                }).toList(),
+                              );
                             } else
                               return Container();
                           }),
