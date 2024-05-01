@@ -123,7 +123,7 @@ class AddPlant extends StatelessWidget {
           FirebaseFirestore.instance.collection('userGarden').doc(userId);
       DocumentSnapshot gardenSnap = await gardenRef.get();
       Map<String, dynamic> gardenData =
-          gardenSnap.data() as Map<String, dynamic> ?? {};
+          gardenSnap.data() as Map<String, dynamic>? ?? {};
       int currentCount = (gardenData['plantCounts']?[plantName] ?? 0) as int;
       int newCount = currentCount + 1;
 
@@ -132,22 +132,21 @@ class AddPlant extends StatelessWidget {
         'plantCounts': {plantName: newCount}
       }, SetOptions(merge: true));
 
- ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('Plant added successfully!'),
-      backgroundColor: Color.fromRGBO(160, 86, 136, 1),
-    ),
-  );
-} catch (error) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('Failed to add plant due to error: $error'),
-      backgroundColor: Color.fromRGBO(160, 86, 136, 1),
-    ),
-  );
-  print('Failed to add plant due to error: $error');
-}
-     
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Plant added successfully!'),
+          backgroundColor: Color.fromRGBO(160, 86, 136, 1),
+        ),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add plant due to error: $error'),
+          backgroundColor: Color.fromRGBO(160, 86, 136, 1),
+        ),
+      );
+      print('Failed to add plant due to error: $error');
+    }
   }
 }
 
