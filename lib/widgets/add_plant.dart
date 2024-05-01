@@ -10,9 +10,12 @@ class AddPlant extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add New Plant To The Garden' ,style: TextStyle(
-      color: Colors.white,
-    ),),
+        title: Text(
+          'Add New Plant To The Garden',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
         backgroundColor: Color(0xFF009688),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -55,7 +58,8 @@ class AddPlant extends StatelessWidget {
                   plantId: plantId,
                   plantName: plantName,
                   plantImage: plantImage,
-                  onAddToGarden: () => _addToUserGarden(userId, plantId), // Pass userId to the function
+                  onAddToGarden: () => _addToUserGarden(
+                      context, userId, plantId), // Pass context here
                   onTap: () {
                     Navigator.push(
                       context,
@@ -76,11 +80,15 @@ class AddPlant extends StatelessWidget {
     );
   }
 
-  Future<void> _addToUserGarden(String userId, String plantId) async {
+  Future<void> _addToUserGarden(
+      BuildContext context, String userId, String plantId) async {
     try {
       // Fetch plant details
       DocumentSnapshot<Map<String, dynamic>> plantSnapshot =
-          await FirebaseFirestore.instance.collection('plants').doc(plantId).get();
+          await FirebaseFirestore.instance
+              .collection('plants')
+              .doc(plantId)
+              .get();
       if (!plantSnapshot.exists) {
         print('Plant with ID $plantId not found.');
         return;
@@ -90,35 +98,56 @@ class AddPlant extends StatelessWidget {
       String plantName = plantSnapshot.data()!['Name'];
       print('Plant name: $plantName');
 
-       // Add plant to userPlant collection
-    String userPlantId = FirebaseFirestore.instance.collection('userPlant').doc().id;
-    await FirebaseFirestore.instance.collection('userPlant').doc(userPlantId).set({
-      'userPlantId': userPlantId,
-      'userId': userId,
-      'plantId': plantId,
-      'plantName': plantName,
-      
+      // Add plant to userPlant collection
+      String userPlantId =
+          FirebaseFirestore.instance.collection('userPlant').doc().id;
+      await FirebaseFirestore.instance
+          .collection('userPlant')
+          .doc(userPlantId)
+          .set({
+        'userPlantId': userPlantId,
+        'userId': userId,
+        'plantId': plantId,
+        'plantName': plantName,
         'waterStatus': false,
         'fertilizerStatus': false,
         'sunlightStatus': false,
         'temperatureStatus': false,
         'humidityStatus': false,
-      
-      //هاذي كلها فولللس باي ديفولت
-      
-      // الكونيكتيد فولس لين النبته تصير كونيكتيد لسينسور
-      
-      'connected': false,
-    });
+        'connected': false,
+        // كلها فولس باي ديفولت والكونكت تصير ترو اذا ارتبطت النبته بسنسور
+      });
 
       // Add userPlantId to userGarden collection
-      await FirebaseFirestore.instance.collection('userGarden').doc(userId).set({
-        'userId': userId,
-        'userPlantIds': FieldValue.arrayUnion([userPlantId]),
+      DocumentReference gardenRef =
+          FirebaseFirestore.instance.collection('userGarden').doc(userId);
+      DocumentSnapshot gardenSnap = await gardenRef.get();
+      Map<String, dynamic> gardenData =
+          gardenSnap.data() as Map<String, dynamic> ?? {};
+      int currentCount = (gardenData['plantCounts']?[plantName] ?? 0) as int;
+      int newCount = currentCount + 1;
+
+      // Update the count in the userGarden
+      await gardenRef.set({
+        'plantCounts': {plantName: newCount}
       }, SetOptions(merge: true));
-    } catch (error) {
-      print('Error adding plant to user garden: $error');
-    }
+
+ ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Plant added successfully!'),
+      backgroundColor: Color.fromRGBO(160, 86, 136, 1),
+    ),
+  );
+} catch (error) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Failed to add plant due to error: $error'),
+      backgroundColor: Color.fromRGBO(160, 86, 136, 1),
+    ),
+  );
+  print('Failed to add plant due to error: $error');
+}
+     
   }
 }
 
@@ -176,7 +205,6 @@ class PlantCard extends StatelessWidget {
     );
   }
 }
-
 
 class PlantCareDetailsPage extends StatelessWidget {
   final String plantId;
@@ -279,10 +307,10 @@ class PlantCareDetailsPage extends StatelessWidget {
   }
 }
 
-
-Widget iconInfo(BuildContext context, IconData icon, String title, String value, Color color) {
+Widget iconInfo(BuildContext context, IconData icon, String title, String value,
+    Color color) {
   return Padding(
-    padding: const EdgeInsets.only(bottom: 30.0), 
+    padding: const EdgeInsets.only(bottom: 30.0),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
