@@ -28,7 +28,8 @@ class PlantCareCard extends StatefulWidget {
 
 var ec, humidity, lightIntensity, ph, tds, temperature;
 getAllSensorData() async {
-  final databaseReference =FirebaseDatabase.instance.reference().child('sensor_reading');
+  final databaseReference =
+      FirebaseDatabase.instance.reference().child('sensor_reading');
 
   DatabaseEvent event = await databaseReference.once();
 
@@ -113,10 +114,8 @@ class NotificationsPage extends StatefulWidget {
 }
 
 Future<void> updatePlantStatus(id, String key, bool value) async {
-  final DocumentSnapshot snapshot = await FirebaseFirestore.instance
-      .collection('userPlant')
-      .doc(id)
-      .get();
+  final DocumentSnapshot snapshot =
+      await FirebaseFirestore.instance.collection('userPlant').doc(id).get();
 
   await FirebaseFirestore.instance
       .collection('userPlant')
@@ -129,93 +128,109 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget build(BuildContext context) {
     String userId = FirebaseAuth.instance.currentUser!.uid;
     final DateTime now = DateTime.now();
-    final DateFormat formatter = DateFormat('HH:mm');
-    final String formattedTime = formatter.format(now);
-    final DateTime startTime = formatter.parse('07:00');
-    final DateTime endTime = formatter.parse('18:00');
+    final int currentHour = now.hour;
+    final DateTime startTime = DateTime(now.year, now.month, now.day, 6);
+    final DateTime endTime = DateTime(now.year, now.month, now.day, 18);
     var data;
 
-    return (now.isAfter(startTime) || now.isBefore(endTime))
-        ? StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('userPlant').snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Center(
-                  child: Text('No plants found'),
-                );
-              } else {
-                return Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        await getAllSensorData();
-                        setState(() {});
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.refresh, color: Color.fromRGBO(160, 86, 136, 1)),
-                          SizedBox(width: 100),
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Color.fromRGBO(160, 86, 136, 1)),
-                            onPressed: () {
-                              setState(() {
-                                tmsgList.clear();
-                                submsgList.clear();
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: snapshot.data!.docs.length,
-                        itemBuilder: (context, index) {
-                          data = snapshot.data!.docs[index];
-                          if (data["connected"] == true && data["userId"] == userId) {
-                            List<String> tempTmsgList = [];
-                            List<String> tempSubmsgList = [];
-
-                            printAllValuesInUserPlantCollection(
-                              data["plantId"],
-                              data["plantName"],
-                              snapshot.data!.docs[index].id,
-                            );
-
-                            tempTmsgList.addAll(tmsgList);
-                            tempSubmsgList.addAll(submsgList);
-
-                            //tmsgList.clear(); // clear tmsgList
-                            //submsgList.clear(); // clear submsgList
-
-                            return Column(
-                              children: tempTmsgList.map((title) {
-                                return PlantCareCard(
-                                  title: title,
-                                  subtitle: tempSubmsgList[tempTmsgList.indexOf(title)],
-                                  icon: Icons.error_outline,
-                                  timeAgo: '',
-                                );
-                              }).toList(),
-                            );
-                          } else
-                            return Container();
+    if (currentHour >= 6 && currentHour <= 18) {
+      return StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('userPlant').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(
+              child: Text('No plants found'),
+            );
+          } else {
+            return Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    await getAllSensorData();
+                    setState(() {});
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.refresh, color: Color.fromRGBO(160, 86, 136, 1)),
+                      SizedBox(width: 100),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Color.fromRGBO(160, 86, 136, 1)),
+                        onPressed: () {
+                          setState(() {
+                            tmsgList.clear();
+                            submsgList.clear();
+                          });
                         },
                       ),
-                    ),
-                  ],
-                );
-              }
-            },
-          )
-        : Container();
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      data = snapshot.data!.docs[index];
+                      if (data["connected"] == true && data["userId"] == userId) {
+                        List<String> tempTmsgList = [];
+                        List<String> tempSubmsgList = [];
+
+                        printAllValuesInUserPlantCollection(
+                          data["plantId"],
+                          data["plantName"],
+                          snapshot.data!.docs[index].id,
+                        );
+
+                        tempTmsgList.addAll(tmsgList);
+                        tempSubmsgList.addAll(submsgList);
+
+                        //tmsgList.clear(); // clear tmsgList
+                        //submsgList.clear(); // clear submsgList
+
+                        return Column(
+                          children: tempTmsgList.map((title) {
+                            return PlantCareCard(
+                              title: title,
+                              subtitle: tempSubmsgList[tempTmsgList.indexOf(title)],
+                              icon: Icons.error_outline,
+                              timeAgo: '',
+                            );
+                          }).toList(),
+                        );
+                      } else
+                        return Container();
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+        },
+      );
+    } else if (currentHour >= 19 || currentHour <= 5) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.nightlight, color: const Color.fromARGB(255, 251, 231, 54), size: 50),
+            Text(
+              '\n \t \t  NIGHTY NIGHT \n\n Your plant is sleeping ',
+              style: TextStyle(
+                  fontSize: 26, color: Color.fromRGBO(160, 86, 136, 1)),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Container();
+    }
   }
+
 
   Future<void> printAllValuesInUserPlantCollection(plantId, name, docid) async {
     final QuerySnapshot snapshot =
