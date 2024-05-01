@@ -28,8 +28,7 @@ class PlantCareCard extends StatefulWidget {
 
 var ec, humidity, lightIntensity, ph, tds, temperature;
 getAllSensorData() async {
-  final databaseReference =
-      FirebaseDatabase.instance.reference().child('sensor_reading');
+  final databaseReference =FirebaseDatabase.instance.reference().child('sensor_reading');
 
   DatabaseEvent event = await databaseReference.once();
 
@@ -66,7 +65,10 @@ class _PlantCareCardState extends State<PlantCareCard> {
               onPressed: () {
                 getAllSensorData();
               },
-              icon: Icon(Icons.notifications_active, color: Color.fromRGBO(160, 86, 136, 1),),
+              icon: Icon(
+                Icons.notifications_active,
+                color: Color.fromRGBO(160, 86, 136, 1),
+              ),
             ),
             Text(
               widget.title,
@@ -79,7 +81,11 @@ class _PlantCareCardState extends State<PlantCareCard> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Icon(widget.icon, size: 24.0, color: Color.fromRGBO(160, 86, 136, 1),),
+                Icon(
+                  widget.icon,
+                  size: 24.0,
+                  color: Color.fromRGBO(160, 86, 136, 1),
+                ),
                 SizedBox(width: 10.0),
                 Expanded(
                   child: Text(
@@ -106,14 +112,111 @@ class NotificationsPage extends StatefulWidget {
   _NotificationsPageState createState() => _NotificationsPageState();
 }
 
-Future<void> updatePlantStatus(id, Map<String, dynamic> state) async {
+Future<void> updatePlantStatus(id, String key, bool value) async {
+  final DocumentSnapshot snapshot = await FirebaseFirestore.instance
+      .collection('userPlant')
+      .doc(id)
+      .get();
+
   await FirebaseFirestore.instance
       .collection('userPlant')
       .doc(id)
-      .update({'plantStatus': state});
+      .update({key: value});
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
+  @override
+  Widget build(BuildContext context) {
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+    final DateTime now = DateTime.now();
+    final DateFormat formatter = DateFormat('HH:mm');
+    final String formattedTime = formatter.format(now);
+    final DateTime startTime = formatter.parse('07:00');
+    final DateTime endTime = formatter.parse('18:00');
+    var data;
+
+    return (now.isAfter(startTime) || now.isBefore(endTime))
+        ? StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection('userPlant').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(
+                  child: Text('No plants found'),
+                );
+              } else {
+                return Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        await getAllSensorData();
+                        setState(() {});
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.refresh, color: Color.fromRGBO(160, 86, 136, 1)),
+                          SizedBox(width: 100),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Color.fromRGBO(160, 86, 136, 1)),
+                            onPressed: () {
+                              setState(() {
+                                tmsgList.clear();
+                                submsgList.clear();
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          data = snapshot.data!.docs[index];
+                          if (data["connected"] == true && data["userId"] == userId) {
+                            List<String> tempTmsgList = [];
+                            List<String> tempSubmsgList = [];
+
+                            printAllValuesInUserPlantCollection(
+                              data["plantId"],
+                              data["plantName"],
+                              snapshot.data!.docs[index].id,
+                            );
+
+                            tempTmsgList.addAll(tmsgList);
+                            tempSubmsgList.addAll(submsgList);
+
+                            //tmsgList.clear(); // clear tmsgList
+                            //submsgList.clear(); // clear submsgList
+
+                            return Column(
+                              children: tempTmsgList.map((title) {
+                                return PlantCareCard(
+                                  title: title,
+                                  subtitle: tempSubmsgList[tempTmsgList.indexOf(title)],
+                                  icon: Icons.error_outline,
+                                  timeAgo: '',
+                                );
+                              }).toList(),
+                            );
+                          } else
+                            return Container();
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              }
+            },
+          )
+        : Container();
+  }
+
   Future<void> printAllValuesInUserPlantCollection(plantId, name, docid) async {
     final QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('plants').get();
@@ -137,163 +240,58 @@ class _NotificationsPageState extends State<NotificationsPage> {
         final tempMax = normalCondition['temp']['max'];
         final tempMin = normalCondition['temp']['min'];
 
-        // tmsgList.clear();
+        // Clear lists
+        tmsgList.clear();
+        submsgList.clear();
 
         if (lightIntensity < lightMin) {
           tmsgList.add('light 💡:your $name plant needs lights');
           submsgList.add('move your $name plant closer to the sun');
-          updatePlantStatus(docid, {
-            
-            'sunlight': false,
-            
-          });
+          updatePlantStatus(docid, 'sunlightStatus', false);
         } else if (lightIntensity > lightMax) {
           tmsgList.add('light 💡:your $name plant has enough of light time');
           submsgList.add('move your $name plant away from the sun');
-          updatePlantStatus(docid, {
-            
-            'sunlight': false,
-           
-          });
-          } else if (lightIntensity < lightMax && lightIntensity > lightMin){
-          updatePlantStatus(docid, {
-            
-            'sunlight': true,
+          updatePlantStatus(docid, 'sunlightStatus', false);
+        } else {
+          updatePlantStatus(docid, 'sunlightStatus', true);
+        }
 
-          });
-        } else if (ph > phMax || ph < phMin) {
+        if (ph > phMax || ph < phMin) {
           tmsgList.add('water 💧: your $name plant needs water');
           submsgList.add('change the water for your $name plant');
-          updatePlantStatus(docid, {
-           
-            'water': false,
-          });
-          } else if (ph < phMax && ph > phMin){
-          updatePlantStatus(docid, {
-            
-            'water': true,
+          updatePlantStatus(docid, 'waterStatus', false);
+        } else {
+          updatePlantStatus(docid, 'waterStatus', true);
+        }
 
-          });
-        } else if (ec > ecMax || ec < ecMin || tds > tdsMax || tds < tdsMin) {
+        if (ec > ecMax || ec < ecMin || tds > tdsMax || tds < tdsMin) {
           tmsgList.add('Fertilize 🪴: your $name plant is hungry');
           submsgList.add('Fertilize your $name plant');
-          updatePlantStatus(docid, {
-            'fertilizer': false,
-            
-          });
-          } else if (ec < ecMax && ec > ecMin || tds < tdsMax && tds > tdsMin){
-          updatePlantStatus(docid, {
-            
-             'fertilizer': true,
+          updatePlantStatus(docid, 'fertilizerStatus', false);
+        } else {
+          updatePlantStatus(docid, 'fertilizerStatus', true);
+        }
 
-          });
-          
-        } else if (temperature > tempMax) {
+        if (temperature > tempMax) {
           tmsgList.add('Temperature 🌡️ : your $name plant is feeling hot');
           submsgList.add('move your $name plant to a colder place');
-          updatePlantStatus(docid, {
-           
-            'temperature': false,
-        
-          });
+          updatePlantStatus(docid, 'temperatureStatus', false);
         } else if (temperature < tempMin) {
           tmsgList.add('Temperature 🌡️ : your $name plant is feeling cold');
           submsgList.add('move your $name plant to a warmer place');
-          updatePlantStatus(docid, {
-            
-            'temperature': false,
-            
-          });
-           } else if (temperature > tempMin && temperature < tempMax){
-          updatePlantStatus(docid, {
-            
-             'temperature': true,
+          updatePlantStatus(docid, 'temperatureStatus', false);
+        } else {
+          updatePlantStatus(docid, 'temperatureStatus', true);
+        }
 
-          });
-        } else if (humidity > humidityMax || humidity < humidityMin) {
+        if (humidity > humidityMax || humidity < humidityMin) {
           tmsgList.add('Humidity 🌪️ :your $name  plant needs some fresh air');
           submsgList.add('open the window so your $name plant can breathe');
-          updatePlantStatus(docid, {
-          
-            'humidity': false,
-            
-          });
-        } else if (humidity < humidityMax && humidity > humidityMin){
-          updatePlantStatus(docid, {
-            
-             'humidity': true,
-
-          });
+          updatePlantStatus(docid, 'humidityStatus', false);
+        } else {
+          updatePlantStatus(docid, 'humidityStatus', true);
+        }
       }
     }
-  }}
-
-  @override
-  Widget build(BuildContext context) {
-    String userId = FirebaseAuth.instance.currentUser!.uid;
-    final DateTime now = DateTime.now();
-    final DateFormat formatter = DateFormat('HH:mm');
-    final String formattedTime = formatter.format(now);
-    final DateTime startTime = formatter.parse('07:00');
-    final DateTime endTime = formatter.parse('18:00');
-    var data;
-    return (now.isAfter(startTime) || now.isBefore(endTime))
-        ? StreamBuilder<QuerySnapshot>(
-            stream:
-                FirebaseFirestore.instance.collection('userPlant').snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Center(
-                  child: Text('No plants found'),
-                );
-              } else {
-                return Column(
-                  children: [
-                    ElevatedButton(
-                        onPressed: () async {
-                          await getAllSensorData();
-                          setState(() {});
-//
-                          // submsg = tmsg = "";
-                        },
-                        child: Icon(Icons.refresh, color: Color.fromRGBO(160, 86, 136, 1),)),
-                    Expanded(
-                      child: ListView.builder(
-                          itemCount: snapshot.data!.docs.length,
-                          itemBuilder: (context, index) {
-                            data = snapshot.data!.docs[index];
-                            if (data["connected"] == true &&
-                                data["userId"] == userId) {
-                              printAllValuesInUserPlantCollection(
-                                  data["plantId"],
-                                  data["plantName"],
-                                  snapshot.data!.docs[index].id);
-
-                              return Column(
-                                children: tmsgList.map((title) {
-                                  return PlantCareCard(
-                                    title: title,
-                                    subtitle:
-                                        submsgList[index % submsgList.length],
-                                    icon: Icons.error_outline,
-                                    
-                                    timeAgo: '',
-                                  );
-                                }).toList(),
-                              );
-                            } else
-                              return Container();
-                          }),
-                    ),
-                  ],
-                );
-              }
-            },
-          )
-        : Container();
   }
 }

@@ -135,39 +135,38 @@ class PlantGardenCard extends StatelessWidget {
             ),
             StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
               stream: FirebaseFirestore.instance
-                  .collection('userPlant')
-                  .doc(userPlantId)
-                  .snapshots(),
+                 .collection('userPlant')
+                 .doc(userPlantId)
+                 .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasData && snapshot.data!.exists) {
                   Map<String, dynamic>? plantData = snapshot.data!.data();
-                  Map<String, dynamic>? plantStatus = plantData?['plantStatus'];
 
                   return Row(
                     children: <Widget>[
                       _buildStatusIcon(
                         Icons.wb_sunny,
-                        plantStatus?['sunlight'] ?? false,
+                        plantData?['sunlightStatus']?? false,
                         Colors.orange,
                       ), //sunlight
                       _buildStatusIcon(
                         Icons.opacity,
-                        plantStatus?['water'] ?? false,
+                        plantData?['waterStatus']?? false,
                         Colors.blue,
                       ), //water
                       _buildStatusIcon(
                         Icons.thermostat_outlined,
-                        plantStatus?['temperature'] ?? false,
+                        plantData?['temperatureStatus']?? false,
                         Colors.red,
                       ), //temperature
                       _buildStatusIcon(
                         Icons.wind_power_rounded,
-                        plantStatus?['humidity'] ?? false,
+                        plantData?['humidityStatus']?? false,
                         Color.fromARGB(255, 40, 56, 163),
                       ), //humidity
                       _buildStatusIcon(
                         Icons.spa,
-                        plantStatus?['fertilizer'] ?? false,
+                        plantData?['fertilizerStatus']?? false,
                         Colors.green,
                       ), //fertilizer
                     ],
@@ -204,10 +203,11 @@ class PlantGardenCard extends StatelessWidget {
   ) {
     return Icon(
       icon,
-      color: status ? color : Colors.grey,
+      color: status? color : Colors.grey,
     );
   }
 }
+
 class GardenModel with ChangeNotifier {
   final List<String> _myGarden = [];
 
