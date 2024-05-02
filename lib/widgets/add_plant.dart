@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class AddPlant extends StatelessWidget {
   final String userId;
@@ -59,7 +59,7 @@ class AddPlant extends StatelessWidget {
                   plantName: plantName,
                   plantImage: plantImage,
                   onAddToGarden: () => _addToUserGarden(
-                      context, userId, plantId), // Pass context here
+                      context, userId, plantId),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -101,22 +101,6 @@ class AddPlant extends StatelessWidget {
       // Add plant to userPlant collection
       String userPlantId =
           FirebaseFirestore.instance.collection('userPlant').doc().id;
-      await FirebaseFirestore.instance
-          .collection('userPlant')
-          .doc(userPlantId)
-          .set({
-        'userPlantId': userPlantId,
-        'userId': userId,
-        'plantId': plantId,
-        'plantName': plantName,
-        'waterStatus': false,
-        'fertilizerStatus': false,
-        'sunlightStatus': false,
-        'temperatureStatus': false,
-        'humidityStatus': false,
-        'connected': false,
-        // كلها فولس باي ديفولت والكونكت تصير ترو اذا ارتبطت النبته بسنسور
-      });
 
       // Add userPlantId to userGarden collection
       DocumentReference gardenRef =
@@ -128,9 +112,24 @@ class AddPlant extends StatelessWidget {
       int newCount = currentCount + 1;
 
       // Update the count in the userGarden
-      await gardenRef.set({
-        'plantCounts': {plantName: newCount}
-      }, SetOptions(merge: true));
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.set(FirebaseFirestore.instance.collection('userPlant').doc(userPlantId), {
+          'userPlantId': userPlantId,
+          'userId': userId,
+          'plantId': plantId,
+          'plantName': '$plantName $newCount',
+          'waterStatus': false,
+          'fertilizerStatus': false,
+          'sunlightStatus': false,
+          'temperatureStatus': false,
+          'humidityStatus': false,
+          'connected': false,
+        });
+
+        transaction.set(gardenRef, {
+          'plantCounts': {plantName: newCount}
+        }, SetOptions(merge: true));
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
