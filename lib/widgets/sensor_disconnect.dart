@@ -7,6 +7,7 @@ class SensorDisconnect extends StatefulWidget {
   @override
   _SensorDisconnectState createState() => _SensorDisconnectState();
 }
+
 class _SensorDisconnectState extends State<SensorDisconnect> {
   List<String> connectedSensors = [];
   String? selectedSensor;
@@ -24,9 +25,9 @@ class _SensorDisconnectState extends State<SensorDisconnect> {
       userId = FirebaseAuth.instance.currentUser!.uid;
 
       QuerySnapshot snapshot = await FirebaseFirestore.instance
-         .collection('userPlant')
-         .where('userId', isEqualTo: userId)
-         .get();
+          .collection('userPlant')
+          .where('userId', isEqualTo: userId)
+          .get();
 
       userPlantIds = snapshot.docs.map((doc) => doc.id).toList();
 
@@ -39,9 +40,9 @@ class _SensorDisconnectState extends State<SensorDisconnect> {
   Future<void> fetchConnectedSensors() async {
     try {
       QuerySnapshot snapshot = await FirebaseFirestore.instance
-         .collection('sensors')
-         .where('userPlantId', whereIn: userPlantIds)
-         .get();
+          .collection('sensors')
+          .where('userPlantId', whereIn: userPlantIds)
+          .get();
 
       List<String> fetchedSensors =
           snapshot.docs.map((doc) => doc['name'].toString()).toList();
@@ -55,98 +56,98 @@ class _SensorDisconnectState extends State<SensorDisconnect> {
   }
 
   Future<void> disconnectSensorFromPlant(String selectedSensor) async {
-  try {
-    String userId = FirebaseAuth.instance.currentUser!.uid;
+    try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
 
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('sensors')
-        .where('name', isEqualTo: selectedSensor)
-        .get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('sensors')
+          .where('name', isEqualTo: selectedSensor)
+          .get();
 
-    if (snapshot.docs.isNotEmpty) {
-      for (QueryDocumentSnapshot doc in snapshot.docs) {
-        if (doc.data() != null &&
-            (doc.data() as Map<String, dynamic>).containsKey('userPlantId') &&
-            doc['userPlantId'] == null) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Error'),
-                content: Text('The selected sensor is already not connected to any plant.'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-          return;
-        }
+      if (snapshot.docs.isNotEmpty) {
+        for (QueryDocumentSnapshot doc in snapshot.docs) {
+          if (doc.data() != null &&
+              (doc.data() as Map<String, dynamic>).containsKey('userPlantId') &&
+              doc['userPlantId'] == null) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Error'),
+                  content: Text('The selected sensor is already not connected to any plant.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('OK'),
+                    ),
+                  ],
+                );
+              },
+            );
+            return;
+          }
 
-        if (doc.data() != null &&
-            (doc.data() as Map<String, dynamic>).containsKey('userPlantId') &&
-            doc['userPlantId'] != null) {
-          String sensorId = doc.id;
-          String userPlantId = doc['userPlantId'];
+          if (doc.data() != null &&
+              (doc.data() as Map<String, dynamic>).containsKey('userPlantId') &&
+              doc['userPlantId'] != null) {
+            String sensorId = doc.id;
+            String userPlantId = doc['userPlantId'];
 
-          // Update sensor document to remove userPlantId
-          await FirebaseFirestore.instance
-              .collection('sensors')
-              .doc(sensorId)
-              .update({'userPlantId': null});
+            // Update sensor document to remove userPlantId
+            await FirebaseFirestore.instance
+                .collection('sensors')
+                .doc(sensorId)
+                .update({'userPlantId': null});
 
-          // Update userPlant document to set connected field to false
-          await FirebaseFirestore.instance
-              .collection('userPlant')
-              .doc(userPlantId)
-              .update({'connected': false});
+            // Update userPlant document to set connected field to false
+            await FirebaseFirestore.instance
+                .collection('userPlant')
+                .doc(userPlantId)
+                .update({'connected': false});
 
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Success'),
-                content: Text('Sensor disconnected from plant successfully.'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Success'),
+                  content: Text('Sensor disconnected from plant successfully.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('OK'),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
         }
       }
+    } catch (error) {
+      print('Error disconnecting sensor from plant: $error');
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Failed to disconnect sensor from plant. Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
     }
-  } catch (error) {
-    print('Error disconnecting sensor from plant: $error');
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Error'),
-          content: Text('Failed to disconnect sensor from plant. Please try again.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -185,8 +186,26 @@ class _SensorDisconnectState extends State<SensorDisconnect> {
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                if (selectedSensor != null) {
+                if (selectedSensor!= null) {
                   disconnectSensorFromPlant(selectedSensor!);
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Error'),
+                        content: Text('Please select a sensor to disconnect.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 }
               },
               child: Text(

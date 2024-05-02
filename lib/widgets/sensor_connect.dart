@@ -23,171 +23,160 @@ class _sensorConnectState extends State<sensorConnect> {
   }
 
   Future<void> fetchAvailableSensors() async {
-  try {
-    String userId = FirebaseAuth.instance.currentUser!.uid;
+    try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
 
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('sensors')
-        .where('userPlantId', isEqualTo: null)
-        .get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('sensors')
+          .where('userPlantId', isEqualTo: null)
+          .get();
 
-    List<String> fetchedSensors = snapshot.docs
-        .map((doc) => doc['name'].toString())
-        .toList();
+      List<String> fetchedSensors = snapshot.docs
+          .map((doc) => doc['name'].toString())
+          .toList();
 
-    setState(() {
-      availableSensors = fetchedSensors;
-    });
-  } catch (error) {
-    print('Error fetching available sensors: $error');
+      setState(() {
+        availableSensors = fetchedSensors;
+      });
+    } catch (error) {
+      print('Error fetching available sensors: $error');
+    }
   }
-}
 
-Future<void> fetchUserPlant() async {
-  try {
-    String userId = FirebaseAuth.instance.currentUser!.uid;
+  Future<void> fetchUserPlant() async {
+    try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
 
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('userPlant')
-        .where('userId', isEqualTo: userId)
-        .where('connected', isEqualTo: false)
-        .get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('userPlant')
+          .where('userId', isEqualTo: userId)
+          .where('connected', isEqualTo: false)
+          .get();
 
-    List<String> fetchedPlants = snapshot.docs
-        .map((doc) => doc['plantName'].toString())
-        .toList();
+      List<String> fetchedPlants = snapshot.docs
+          .map((doc) => doc['plantName'].toString())
+          .toList();
 
-    setState(() {
-      userPlant = fetchedPlants;
-    });
-  } catch (error) {
-    print('Error fetching user plants: $error');
+      setState(() {
+        userPlant = fetchedPlants;
+      });
+    } catch (error) {
+      print('Error fetching user plants: $error');
+    }
   }
-}
 
- Future<void> connectSensorToPlant(String selectedSensor, String selectedPlant) async {
-  try {
-    
-    String userId = FirebaseAuth.instance.currentUser!.uid;
-    String userPlantId = await getUserPlantId(userId, selectedPlant);
+  Future<void> connectSensorToPlant(String selectedSensor, String selectedPlant) async {
+    try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+      String userPlantId = await getUserPlantId(userId, selectedPlant);
 
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('sensors')
-        .where('name', isEqualTo: selectedSensor)
-        .get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('sensors')
+          .where('name', isEqualTo: selectedSensor)
+          .get();
 
-    if (snapshot.docs.isNotEmpty) {
-      
-      for (QueryDocumentSnapshot doc in snapshot.docs) {
-        
-        if (doc.data() != null && (doc.data() as Map<String, dynamic>).containsKey('userPlantId') && doc['userPlantId'] != null) {
-          
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Error'),
-                content: Text('The selected sensor is already connected to a plant.'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-          return;
+      if (snapshot.docs.isNotEmpty) {
+        for (QueryDocumentSnapshot doc in snapshot.docs) {
+          if (doc.data() != null && (doc.data() as Map<String, dynamic>).containsKey('userPlantId') && doc['userPlantId'] != null) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Error'),
+                  content: Text('The selected sensor is already connected to a plant.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('OK'),
+                    ),
+                  ],
+                );
+              },
+            );
+            return;
+          }
         }
       }
-    }
 
-    // If the execution reaches here, the sensor is not connected to any plant
-    // Update sensor document with userPlantId
-    await FirebaseFirestore.instance
-        .collection('sensors')
-        .where('name', isEqualTo: selectedSensor)
-        .limit(1)
-        .get()
-        .then((snapshot) {
+      await FirebaseFirestore.instance
+          .collection('sensors')
+          .where('name', isEqualTo: selectedSensor)
+          .limit(1)
+          .get()
+          .then((snapshot) {
+        if (snapshot.docs.isNotEmpty) {
+          String sensorId = snapshot.docs.first.id;
+          FirebaseFirestore.instance
+              .collection('sensors')
+              .doc(sensorId)
+              .update({'userPlantId': userPlantId});
+        }
+      });
+
+      await FirebaseFirestore.instance
+          .collection('userPlant')
+          .doc(userPlantId)
+          .update({'connected': true});
+
+      showDialog(
+        context:context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Success'),
+            content: Text('Sensor connected to plant successfully.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (error) {
+      print('Error connecting sensor to plant: $error');
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Failed to connect sensor to plant. Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<String> getUserPlantId(String userId, String selectedPlant) async {
+    String userPlantId = '';
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('userPlant')
+          .where('userId', isEqualTo: userId)
+          .where('plantName', isEqualTo: selectedPlant)
+          .limit(1)
+          .get();
+
       if (snapshot.docs.isNotEmpty) {
-        String sensorId = snapshot.docs.first.id;
-        FirebaseFirestore.instance
-            .collection('sensors')
-            .doc(sensorId)
-            .update({'userPlantId': userPlantId});
+        userPlantId = snapshot.docs.first.id;
       }
-    });
-
-    // Update userPlant document with connected field
-    await FirebaseFirestore.instance
-        .collection('userPlant')
-        .doc(userPlantId)
-        .update({'connected': true});
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Success'),
-          content: Text('Sensor connected to plant successfully.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  } catch (error) {
-    
-    print('Error connecting sensor to plant: $error');
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Error'),
-          content: Text('Failed to connect sensor to plant. Please try again.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-// Function to get userPlantId based on the selected plant
-Future<String> getUserPlantId(String userId, String selectedPlant) async {
-  String userPlantId = '';
-  try {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('userPlant')
-        .where('userId', isEqualTo: userId)
-        .where('plantName', isEqualTo: selectedPlant)
-        .limit(1)
-        .get();
-
-    if (snapshot.docs.isNotEmpty) {
-      userPlantId = snapshot.docs.first.id;
+    } catch (error) {
+      print('Error fetching user plant ID: $error');
     }
-  } catch (error) {
-    print('Error fetching user plant ID: $error');
+    return userPlantId;
   }
-  return userPlantId;
-}
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +193,7 @@ Future<String> getUserPlantId(String userId, String selectedPlant) async {
               'Select a sensor:',
               style: TextStyle(
                 fontSize: 18,
-fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: 8),
@@ -248,19 +237,37 @@ fontWeight: FontWeight.bold,
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                if (selectedSensor != null && selectedPlant != null) {
+                if (selectedSensor == null || selectedPlant == null) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Error'),
+                        content: Text('Please select a sensor and a plant before pressing connect button.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
                   connectSensorToPlant(selectedSensor!, selectedPlant!);
                 }
               },
-              child: Text('Connect',style: TextStyle(
-                    color: Color.fromARGB(255, 255, 255, 255),
-                  ),
-                ),style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF009688),
-                  padding: EdgeInsets.symmetric(horizontal: 45.0, vertical: 14.0),
-                  textStyle: TextStyle(fontSize: 16.0),
-                ),
+              child: Text('Connect'),
+              style: ElevatedButton.styleFrom(
+                
               
+                foregroundColor: Colors.white,
+                backgroundColor: Color(0xFF009688),
+                padding: EdgeInsets.symmetric(horizontal: 45.0, vertical: 14.0),
+                textStyle: TextStyle(fontSize: 16.0),
+              ),
             ),
           ],
         ),

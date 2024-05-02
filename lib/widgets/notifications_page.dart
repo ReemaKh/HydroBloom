@@ -263,10 +263,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
           tmsgList.add('light 💡:your $name plant needs lights');
           submsgList.add('move your $name plant closer to the sun');
           updatePlantStatus(docid, 'sunlightStatus', false);
+
         } else if (lightIntensity > lightMax) {
           tmsgList.add('light 💡:your $name plant has enough of light time');
           submsgList.add('move your $name plant away from the sun');
           updatePlantStatus(docid, 'sunlightStatus', false);
+          
         } else {
           updatePlantStatus(docid, 'sunlightStatus', true);
         }
