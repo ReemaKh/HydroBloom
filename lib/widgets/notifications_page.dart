@@ -129,11 +129,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
     String userId = FirebaseAuth.instance.currentUser!.uid;
     final DateTime now = DateTime.now();
     final int currentHour = now.hour;
-    final DateTime startTime = DateTime(now.year, now.month, now.day, 6);
+    final DateTime startTime = DateTime(now.year, now.month, now.day, 7);
     final DateTime endTime = DateTime(now.year, now.month, now.day, 24);
     var data;
 
-    if (currentHour >= 6 && currentHour <= 24) {
+    if (currentHour >= 7 && currentHour <= 18) {
       return StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('userPlant').snapshots(),
         builder: (context, snapshot) {
@@ -212,7 +212,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           }
         },
       );
-    } else if (currentHour >= 1 || currentHour <= 5) {
+    } else if ((currentHour < 7 || currentHour >= 18) ) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

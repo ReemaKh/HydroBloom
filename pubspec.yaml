@@ -37,6 +37,11 @@ dependencies:
   password_strength: ^0.2.0
   firebase_database: any
   intl: any
+  connectivity: ^3.0.6
+  geolocator: ^8.2.0
+  
+  wifi_info_flutter: ^2.0.2
+  flutter_blue: ^0.8.0
 
 
   # The following adds the Cupertino Icons font to your application.
