@@ -158,6 +158,7 @@ class _SensorDisconnectState extends State<SensorDisconnect> {
       body: Padding(
         padding: EdgeInsets.all(120.0),
         child: Column(
+         
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
@@ -215,7 +216,7 @@ class _SensorDisconnectState extends State<SensorDisconnect> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF009688),
+                backgroundColor:  Color.fromARGB(255, 160, 86, 136),
                 padding: EdgeInsets.symmetric(horizontal: 45.0, vertical: 14.0),
                 textStyle: TextStyle(fontSize: 16.0),
               ),
