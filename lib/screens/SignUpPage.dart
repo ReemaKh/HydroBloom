@@ -65,32 +65,25 @@ class _SignUpPageState extends State<SignUpPage> {
       );
 
       if (userCredential.user != null) {
-        // Generate a unique user ID
         String userId = userCredential.user!.uid;
-
-        // Store user information in Firestore
         await FirebaseFirestore.instance.collection('users').doc(userId).set({
           'email': email,
           'first_name': firstName,
           'last_name': lastName,
           'user_type': 'user', // by default
         });
-
-        // Send email verification
         await userCredential.user!.sendEmailVerification(
         );
-
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => VerifyEmailPage()),
         );
       } else {
-        // Handle null user case
+        
         print('Error signing up: User is null');
       }
     } catch (error) {
       print('Error signing up: $error');
-      // Handle error and display appropriate error message
       if (error is FirebaseAuthException) {
         setState(() {
           _emailErrorText = error.message ?? 'An error occurred';

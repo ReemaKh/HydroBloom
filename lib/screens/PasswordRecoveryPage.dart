@@ -22,10 +22,7 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
     }
 
     try {
-      // Send password reset email
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-
-      // Password reset email sent successfully
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -45,7 +42,6 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
       );
     } catch (error) {
       print('Error sending password reset email: $error');
-      
       showDialog(
         context: context,
         builder: (BuildContext context) {

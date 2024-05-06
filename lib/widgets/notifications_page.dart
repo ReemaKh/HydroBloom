@@ -133,7 +133,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     final DateTime endTime = DateTime(now.year, now.month, now.day, 24);
     var data;
 
-    if (1==1) {
+    if (currentHour >= 7 && currentHour <= 18) {
       return StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('userPlant').snapshots(),
         builder: (context, snapshot) {

@@ -49,13 +49,11 @@ class _LogInPageState extends State<LogInPage> {
 
       if (userCredential.user != null) {
         if (userCredential.user!.emailVerified) {
-          // User is authenticated and email is verified, navigate to mainscreen
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => MainScreen()),
           );
         } else {
-          // Email is not verified
           setState(() {
             _emailErrorText = 'Email is not verified';
             _passwordErrorText = '';
