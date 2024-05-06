@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'disease_treatment_page.dart';
 import 'water_change_page.dart';
 import 'fertilizer_page.dart';
-import 'fertilizing_page.dart';
+import 'fertilizing_way.dart';
+
+
 
 class GuidePage extends StatelessWidget {
   @override
@@ -18,7 +20,7 @@ class GuidePage extends StatelessWidget {
             onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => DiseaseTreatmentPage())),
+                    builder: (context) => PlantSelectionPage())),
           ),
           GuideItem(
             title: 'The correct way to change water',

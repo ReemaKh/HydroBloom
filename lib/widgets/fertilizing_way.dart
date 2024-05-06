@@ -1,61 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:hydrobloomapp/widgets/water_change_page.dart';
 
-class WaterChangePage extends StatelessWidget {
+class FertilizingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Water Change'),
-      ),
+      appBar: AppBar(title: Text('Fertilizing Methods')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
               Text(
-                'Changing water for your plants is crucial to their health. Here’s how to do it correctly for various types:',
+                'To ensure your aquatic plants thrive, use the right fertilization methods. Here’s a guide:',
                 style: TextStyle(fontSize: 18),
               ),
               SizedBox(height: 20),
-              _WaterChangeCard(
+              _FertilizingCard(
                 title: 'Bamboo',
-                icon: Icons.water_drop,
-                iconColor: const Color.fromARGB(255, 94, 180, 250),
+                icon: Icons.local_florist,
+                iconColor: Color.fromARGB(255, 233, 198, 41),
                 instructions: [
-                  'Change the water every 2 to 4 weeks.',
-                  'Use distilled or rainwater to avoid salt buildup.',
-                  'Gently rinse the roots under running water, clean the container, then refill it with fresh water.',
+                  'Requires very little fertilization. Use a diluted liquid fertilizer every 2-3 months.',
+                  'Ensure the fertilizer has a low nitrogen content.',
                 ],
               ),
               SizedBox(height: 16),
-              _WaterChangeCard(
+              _FertilizingCard(
                 title: 'Sansevieria',
-                icon: Icons.water_drop,
-                iconColor: const Color.fromARGB(255, 68, 129, 234),
+                icon: Icons.local_florist,
+                iconColor:Color.fromARGB(255, 181, 84, 84),
                 instructions: [
-                  'Sansevieria is typically grown in soil, but if using water culture, change the water every 2 weeks.',
-                  'Use room temperature distilled water to avoid shock and chemical buildup.',
-                  'Ensure the container is cleaned before refilling to prevent bacterial growth.',
+                  'Fertilize sparingly, no more than once a month during the growing season.',
+                  'Use a balanced, water-soluble fertilizer, diluted to half the recommended strength.',
                 ],
               ),
               SizedBox(height: 16),
-              _WaterChangeCard(
+              _FertilizingCard(
                 title: 'Pothos',
-                icon: Icons.water_drop,
-                iconColor: const Color.fromARGB(255, 35, 107, 143),
+                icon: Icons.local_florist,
+                iconColor: Color.fromARGB(255, 204, 91, 170),
                 instructions: [
-                  'Change the water every 1 to 2 weeks.',
-                  'Use distilled water or aired tap water to avoid chlorine and other chemicals.',
+                  'Fertilize every 4-6 weeks with a diluted liquid fertilizer.',
+                  'Choose a balanced fertilizer and use it at half the dose recommended for soil-grown plants.',
                 ],
               ),
               SizedBox(height: 16),
-              _WaterChangeCard(
+              _FertilizingCard(
                 title: 'Peace Lily',
-                icon: Icons.water_drop,
-                iconColor: Color.fromARGB(255, 9, 69, 98),
+                icon: Icons.local_florist,
+                iconColor: Color.fromARGB(255, 136, 48, 184),
                 instructions: [
-                  'Change the water weekly, especially if grown in water only.',
-                  'Distilled water is preferred to avoid mineral buildup.',
+                  'Use a diluted liquid fertilizer once a month during spring and summer.',
+                  'Opt for a fertilizer with higher phosphorus content to encourage blooming.',
                 ],
               ),
             ],
@@ -66,13 +63,13 @@ class WaterChangePage extends StatelessWidget {
   }
 }
 
-class _WaterChangeCard extends StatelessWidget {
+class _FertilizingCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final Color iconColor;
   final List<String> instructions;
 
-  _WaterChangeCard({required this.title, required this.icon, required this.iconColor, required this.instructions});
+  _FertilizingCard({required this.title, required this.icon, required this.iconColor, required this.instructions});
 
   @override
   Widget build(BuildContext context) {
